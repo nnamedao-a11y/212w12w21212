@@ -19,6 +19,7 @@ import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricCh
 import { safeGet, fmtCompact, fmtMoney, riskBandClass } from '../shared/insightsApi';
 import ReassignPopover from '../shared/ReassignPopover';
 import ManagerDrillSheet from '../shared/ManagerDrillSheet';
+import AlertDrillSheet from '../shared/AlertDrillSheet';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 
@@ -171,13 +172,84 @@ function CriticalAlertsFeed({ alerts, onOpen, severity, setSeverity, onRefresh }
   );
 }
 
-function EscalationQueue({ escalations, onOpen, onAction }) {
+function EscalationQueue({ escalations, onOpen, onAction, onBulkAction }) {
+  const [selected, setSelected] = useState(new Set());
+  const [bulkReassignOpen, setBulkReassignOpen] = useState(false);
+  const [bulkReassignOwner, setBulkReassignOwner] = useState('');
+
+  const toggleOne = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const allIds = escalations.map(e => e._id || e.id).filter(Boolean);
+  const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id));
+  const toggleAll = () => {
+    setSelected(prev => {
+      if (allSelected) return new Set();
+      return new Set(allIds);
+    });
+  };
+  const selectedItems = escalations.filter(e => selected.has(e._id || e.id));
+  const hasSelection = selectedItems.length > 0;
+
+  const handleBulk = async (action, extra) => {
+    await onBulkAction?.(action, selectedItems, extra);
+    setSelected(new Set());
+  };
+
   return (
-    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Warning size={14} weight="duotone" /> Escalation Queue</span>} padded={false} testId="insights-escalation-queue-card">
+    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Warning size={14} weight="duotone" /> Escalation Queue</span>} padded={false} testId="insights-escalation-queue-card"
+      actions={hasSelection ? (
+        <div className="flex items-center gap-1.5" data-testid="insights-escalation-bulk-actions">
+          <span className="text-[11px] font-medium text-zinc-700">{selectedItems.length} selected</span>
+          <button onClick={() => handleBulk('resolve')} className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700" data-testid="insights-escalation-bulk-resolve">
+            <CheckCircle size={11} weight="bold" /> Bulk Resolve
+          </button>
+          <button onClick={() => handleBulk('snooze')} className="inline-flex items-center gap-1 rounded-md bg-sky-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-sky-700" data-testid="insights-escalation-bulk-snooze">
+            <Snowflake size={11} weight="bold" /> Bulk Snooze
+          </button>
+          <span className="relative">
+            <button onClick={() => setBulkReassignOpen(v => !v)} className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white hover:bg-zinc-800" data-testid="insights-escalation-bulk-reassign-trigger">
+              <ArrowsClockwise size={11} weight="bold" /> Bulk Reassign
+            </button>
+            {bulkReassignOpen && (
+              <span className="absolute right-0 top-full z-50 mt-1 inline-flex w-64 flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-lg" data-testid="insights-escalation-bulk-reassign-panel">
+                <span className="text-xs font-medium text-zinc-900">Reassign {selectedItems.length} to</span>
+                <input
+                  value={bulkReassignOwner}
+                  onChange={(e) => setBulkReassignOwner(e.target.value)}
+                  placeholder="manager@bibi.cars"
+                  className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-900 focus:border-zinc-400 focus:outline-none"
+                  data-testid="insights-escalation-bulk-reassign-input"
+                  autoFocus
+                />
+                <span className="flex justify-end gap-1">
+                  <button type="button" onClick={() => { setBulkReassignOpen(false); setBulkReassignOwner(''); }} className="rounded-md px-2 py-1 text-[11px] font-medium text-zinc-600 hover:bg-zinc-100">Cancel</button>
+                  <button
+                    type="button"
+                    disabled={!bulkReassignOwner.trim()}
+                    onClick={async () => { await handleBulk('reassign', { owner: bulkReassignOwner.trim() }); setBulkReassignOpen(false); setBulkReassignOwner(''); }}
+                    className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white disabled:opacity-50"
+                    data-testid="insights-escalation-bulk-reassign-confirm"
+                  ><CheckCircle size={11} weight="bold" /> Confirm</button>
+                </span>
+              </span>
+            )}
+          </span>
+          <button onClick={() => setSelected(new Set())} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] text-zinc-600 hover:bg-zinc-50">Clear</button>
+        </div>
+      ) : null}
+    >
       <div className="max-h-[480px] overflow-auto">
         <table className="w-full text-sm" data-testid="insights-escalation-queue-table">
           <thead className="sticky top-0 z-10 bg-white">
             <tr className="border-b border-zinc-100 text-[11px] uppercase tracking-wider text-zinc-500">
+              <th className="w-8 px-2 py-2 text-left font-medium">
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} className="h-3.5 w-3.5 cursor-pointer accent-zinc-900" data-testid="insights-escalation-select-all" aria-label="Select all" />
+              </th>
               <th className="px-4 py-2 text-left font-medium">Priority</th>
               <th className="px-4 py-2 text-left font-medium">Item</th>
               <th className="px-4 py-2 text-left font-medium">Owner</th>
@@ -189,13 +261,16 @@ function EscalationQueue({ escalations, onOpen, onAction }) {
           </thead>
           <tbody>
             {escalations.length === 0 ? (
-              <tr><td colSpan={7}><InsightsEmpty title="Escalation queue is empty" hint="Nothing requires escalation. Maintain SLAs and this stays clear." /></td></tr>
+              <tr><td colSpan={8}><InsightsEmpty title="Escalation queue is empty" hint="Nothing requires escalation. Maintain SLAs and this stays clear." /></td></tr>
             ) : escalations.map((e, i) => {
+              const id = e._id || e.id;
               const breached = e.slaBreached || e.breached;
               const dueSoon = e.dueSoon;
-              const rowBg = breached ? 'border-l-4 border-l-red-500 bg-red-50/50' : dueSoon ? 'border-l-4 border-l-amber-500 bg-amber-50/50' : '';
+              const isSel = selected.has(id);
+              const rowBg = isSel ? 'bg-zinc-50' : breached ? 'border-l-4 border-l-red-500 bg-red-50/50' : dueSoon ? 'border-l-4 border-l-amber-500 bg-amber-50/50' : '';
               return (
-                <tr key={e._id || e.id || i} className={`border-b border-zinc-50 hover:bg-zinc-50 ${rowBg}`}>
+                <tr key={id || i} className={`border-b border-zinc-50 hover:bg-zinc-50 ${rowBg}`}>
+                  <td className="w-8 px-2 py-2"><input type="checkbox" checked={isSel} onChange={() => toggleOne(id)} onClick={(ev) => ev.stopPropagation()} className="h-3.5 w-3.5 cursor-pointer accent-zinc-900" data-testid={`insights-escalation-select-${i}`} aria-label="Select row" /></td>
                   <td className="px-4 py-2"><SeverityDot severity={e.severity || (breached?'critical':'medium')} /></td>
                   <td className="px-4 py-2"><button type="button" onClick={() => onOpen?.(e)} className="text-left font-medium text-zinc-900 hover:underline">{e.title || e.subject || e.itemTitle || e.message || e.type || '—'}</button></td>
                   <td className="px-4 py-2 text-zinc-700">{e.owner || e.ownerEmail || e.assignedTo || '—'}</td>
@@ -283,6 +358,7 @@ const RiskAlertsVertical = ({ scope }) => {
   const [severity, setSeverity] = useState('all');
   const [openItem, setOpenItem] = useState(null);
   const [drillManager, setDrillManager] = useState(null);
+  const [drillAlert, setDrillAlert] = useState(null);
   const [refreshTick, setRefreshTick] = useState(0);
 
   useEffect(() => {
@@ -412,6 +488,36 @@ const RiskAlertsVertical = ({ scope }) => {
     }
   };
 
+  // Bulk action handler — sequentially calls the per-item endpoint.
+  // Sequential rather than Promise.all to avoid hammering the API and to
+  // keep optimistic UI updates predictable.
+  const handleBulkAction = async (action, items, extra = {}) => {
+    if (!items?.length) return;
+    const ids = items.map(it => it._id || it.id).filter(Boolean);
+    for (const id of ids) {
+      try {
+        if (action === 'resolve') {
+          await axios.post(`${API_URL}/api/escalations/${id}/resolve`, { actor: 'admin' });
+        } else if (action === 'snooze') {
+          await axios.post(`${API_URL}/api/escalations/${id}/snooze`, { hours: extra.hours || 4, actor: 'admin' });
+        } else if (action === 'reassign' && extra.owner) {
+          await axios.post(`${API_URL}/api/escalations/${id}/reassign`, { owner: extra.owner, actor: 'admin' });
+        }
+      } catch (err) {
+        console.error('[insights] bulk action failed for', id, err);
+      }
+    }
+    // Optimistic UI refresh
+    if (action === 'resolve' || action === 'snooze') {
+      setEscalations(prev => prev.filter(e => !ids.includes(e._id || e.id)));
+    } else if (action === 'reassign') {
+      setEscalations(prev => prev.map(e => ids.includes(e._id || e.id)
+        ? { ...e, owner: extra.owner, ownerEmail: extra.owner, assignedTo: extra.owner }
+        : e
+      ));
+    }
+  };
+
   if (loading) return <InsightsLoading rows={8} />;
 
   return (
@@ -423,10 +529,10 @@ const RiskAlertsVertical = ({ scope }) => {
         <RiskByEntitySection entities={entities} onOpenManager={setDrillManager} />
       </InsightsSection>
       <InsightsSection id="critical-alerts-feed" title="Critical Alerts · Live Feed" subtitle="Filter by severity · click cell for timeline">
-        <CriticalAlertsFeed alerts={alerts} onOpen={setOpenItem} severity={severity} setSeverity={setSeverity} onRefresh={() => setRefreshTick(t => t+1)} />
+        <CriticalAlertsFeed alerts={alerts} onOpen={setDrillAlert} severity={severity} setSeverity={setSeverity} onRefresh={() => setRefreshTick(t => t+1)} />
       </InsightsSection>
       <InsightsSection id="escalation-queue" title="Escalation Queue" subtitle="Resolve · Snooze · Reassign in line">
-        <EscalationQueue escalations={escalations} onOpen={setOpenItem} onAction={handleAction} />
+        <EscalationQueue escalations={escalations} onOpen={setOpenItem} onAction={handleAction} onBulkAction={handleBulkAction} />
       </InsightsSection>
       <InsightsSection id="stuck-items" title="Unified Stuck Items" subtitle="Stale leads · Overdue invoices · Stalled shipments — one boil">
         <StuckItems items={stuck} />
@@ -434,6 +540,14 @@ const RiskAlertsVertical = ({ scope }) => {
 
       {/* Deep manager drill-down — opens on click in "Risk by Manager" rows */}
       <ManagerDrillSheet open={!!drillManager} onOpenChange={(o) => !o && setDrillManager(null)} manager={drillManager} />
+
+      {/* Deep alert drill-down — replaces legacy JSON sheet for Alerts feed */}
+      <AlertDrillSheet
+        open={!!drillAlert}
+        onOpenChange={(o) => !o && setDrillAlert(null)}
+        alert={drillAlert}
+        onResolve={(a) => handleAction('resolve', a)}
+      />
 
       {/* Lightweight raw-detail sheet — still used for Alerts feed + Escalation rows
           (those don't have a dedicated drill-down primitive yet). */}

@@ -3796,6 +3796,16 @@ try:
 except Exception as _e:
     logger.exception("[admin_staff_sessions] failed to mount router: %s", _e)
 
+# Wave-8.4 — Workers Health admin router (list / restart / stop / start)
+# Modular control panel for supervised workers exposed via worker_registry.
+try:
+    from app.routers import admin_workers as _admin_workers_mod
+    fastapi_app.include_router(_admin_workers_mod.router)
+    logger.info("[admin_workers] router mounted: %d routes",
+                sum(1 for _ in _admin_workers_mod.router.routes))
+except Exception as _e:
+    logger.exception("[admin_workers] failed to mount router: %s", _e)
+
 # ─────────────────────────────────────────────────────────────────────────
 #  Wave 2B / Batch 2 / Commit 8:  admin_security + admin_history_reports
 #  (см. app/routers/admin_security.py, app/routers/admin_history_reports.py

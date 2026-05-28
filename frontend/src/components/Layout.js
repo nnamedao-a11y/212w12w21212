@@ -62,7 +62,8 @@ import {
   Warning,
   Gauge,
   Scales,
-  LockKey
+  LockKey,
+  Pulse
 } from '@phosphor-icons/react';
 
 const Layout = () => {
@@ -398,6 +399,8 @@ const Layout = () => {
         // Unified System hub: combines old "System" + "Auth & URLs" + "Email outbox"
         { path: '/admin/settings', icon: Wrench, label: 'System', matchPrefix: true, roles: ['master_admin', 'admin'] },
         { path: '/admin/system-settings', icon: Globe, label: 'Domain & CORS', roles: ['master_admin'] },
+        // Wave-8.4 — Workers Health (supervised worker control panel)
+        { path: '/admin/workers', icon: Pulse, label: 'Workers Health', roles: ['master_admin', 'admin'] },
         { path: '/admin/info', icon: FileText, label: 'Info' },
       ],
       roles: ['master_admin', 'moderator', 'admin']

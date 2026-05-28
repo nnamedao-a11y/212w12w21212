@@ -119,6 +119,7 @@ import ContractsAccountingPage from './pages/admin/ContractsAccountingPage';
 import LegalWorkflowPage from './pages/admin/LegalWorkflowPage';
 import RingostatAdminPage from './pages/admin/RingostatAdminPage';
 import AdminSystemSettingsPage from './pages/admin/AdminSystemSettingsPage';
+import AdminWorkersPage from './pages/admin/AdminWorkersPage';
 import VesselFinderSessionPage from './pages/admin/VesselFinderSessionPage';
 import ExceptionsDashboardPage from './pages/admin/ExceptionsDashboardPage';
 import AutomationExceptionsPage from './pages/admin/AutomationExceptionsPage';
@@ -594,6 +595,8 @@ function App() {
               <Route path="settings/legal-policy" element={<LegalPolicySettingsPage />} />
               <Route path="ringostat" element={<RingostatAdminPage />} />
               <Route path="system-settings" element={<AdminSystemSettingsPage />} />
+              {/* Wave-8.4 — Workers Health (supervised worker registry control panel) */}
+              <Route path="workers" element={<AdminWorkersPage />} />
 
               {/* ═══════════════════ Unified TRACKING hub ═══════════════════
                 * Single sidebar entry in the main left nav → `/admin/tracking`.
