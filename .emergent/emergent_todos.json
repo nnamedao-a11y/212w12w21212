@@ -1,30 +1,46 @@
 [
   {
-    "content": "Clone repo & inspect structure",
-    "status": "completed"
+    "content": "Design guidelines for Insights hub (design_agent)",
+    "status": "in_progress"
   },
   {
-    "content": "Copy code from /tmp/repo to /app preserving .env files",
-    "status": "completed"
+    "content": "Audit backend endpoints for all 5 verticals",
+    "status": "pending"
   },
   {
-    "content": "Install backend Python dependencies",
-    "status": "completed"
+    "content": "Build /insights skeleton + KPI strip + tab nav (role-aware)",
+    "status": "pending"
   },
   {
-    "content": "Install frontend Node dependencies",
-    "status": "completed"
+    "content": "Vertical 1: Traffic & Engagement (Analytics + UserEngagement + Intent merged)",
+    "status": "pending"
   },
   {
-    "content": "Restart supervisor & verify services",
-    "status": "completed"
+    "content": "Vertical 2: Pipeline (Leads sub-tab + Deals sub-tab with funnel/bottlenecks/cycle)",
+    "status": "pending"
   },
   {
-    "content": "Smoke test backend API and frontend UI",
-    "status": "completed"
+    "content": "Vertical 3: Revenue (Payments + Contracts + Documents merged, AR ageing)",
+    "status": "pending"
   },
   {
-    "content": "Capture screenshots and verify in browser",
-    "status": "completed"
+    "content": "Vertical 4: Team & Managers (Scorecards + Load + SLA + Login Audit)",
+    "status": "pending"
+  },
+  {
+    "content": "Vertical 5: Risk & Alerts (DEEP — composite score + alerts + escalations + stuck items)",
+    "status": "pending"
+  },
+  {
+    "content": "Rewire sidebar: replace 8 entries with single Insights entry",
+    "status": "pending"
+  },
+  {
+    "content": "Add 301 redirects from old URLs",
+    "status": "pending"
+  },
+  {
+    "content": "Test end-to-end with testing_agent_v3",
+    "status": "pending"
   }
 ]
