@@ -1,0 +1,30 @@
+[
+  {
+    "content": "Clone repo & inspect structure",
+    "status": "completed"
+  },
+  {
+    "content": "Copy code from /tmp/repo to /app preserving .env files",
+    "status": "completed"
+  },
+  {
+    "content": "Install backend Python dependencies",
+    "status": "completed"
+  },
+  {
+    "content": "Install frontend Node dependencies",
+    "status": "completed"
+  },
+  {
+    "content": "Restart supervisor & verify services",
+    "status": "completed"
+  },
+  {
+    "content": "Smoke test backend API and frontend UI",
+    "status": "completed"
+  },
+  {
+    "content": "Capture screenshots and verify in browser",
+    "status": "completed"
+  }
+]
