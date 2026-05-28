@@ -585,10 +585,10 @@ function App() {
               <Route path="routing-rules" element={<RoutingRulesPage />} />
               <Route path="cadences" element={<CadencesPage />} />
               <Route path="score-rules" element={<ScoreRulesPage />} />
-              <Route path="journey" element={<JourneyPage />} />
-              <Route path="risk" element={<RiskDashboardPage />} />
-              <Route path="escalations" element={<EscalationDashboard />} />
-              <Route path="contracts/accounting" element={<ContractsAccountingPage />} />
+              <Route path="journey" element={<Navigate to="/admin/insights?tab=pipeline" replace />} />
+              <Route path="risk" element={<Navigate to="/admin/insights?tab=risk" replace />} />
+              <Route path="escalations" element={<Navigate to="/admin/insights?tab=risk" replace />} />
+              <Route path="contracts/accounting" element={<Navigate to="/admin/insights?tab=revenue" replace />} />
               <Route path="legal" element={<LegalWorkflowPage />} />
               {/* Wave 6 — Legal Policy (config only, separate from /admin/legal workspace) */}
               <Route path="settings/legal-policy" element={<LegalPolicySettingsPage />} />
@@ -655,8 +655,8 @@ function App() {
               <Route path="orders" element={<ManagerOrdersPage />} />
               <Route path="shipments" element={<ManagerShipmentsPage />} />
               <Route path="tracking" element={<UniversalTrackerPage />} />
-              {/* /manager/engagement removed in Wave 7.5 — use /admin/engagement (top-level, all staff). */}
-              <Route path="engagement" element={<Navigate to="/admin/engagement" replace />} />
+              {/* Wave-8: /manager/engagement → consolidated into Insights → Traffic tab. */}
+              <Route path="engagement" element={<Navigate to="/admin/insights?tab=traffic" replace />} />
               <Route path="wishlist" element={<ManagerWishlistPage />} />
               <Route path="profile/password" element={<ChangePasswordPage />} />
             </Route>

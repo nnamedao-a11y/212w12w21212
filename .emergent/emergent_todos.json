@@ -4,47 +4,47 @@
     "status": "completed"
   },
   {
-    "content": "Read design_guidelines.md fully",
-    "status": "in_progress"
-  },
-  {
     "content": "Audit backend endpoints for all 5 verticals",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Build /insights skeleton + KPI strip + tab nav (role-aware)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Vertical 1: Traffic & Engagement",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Vertical 2: Pipeline (Leads + Deals)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Vertical 3: Revenue (Payments + Contracts + Documents)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Vertical 4: Team & Managers",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Vertical 5: Risk & Alerts (DEEP)",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Rewire sidebar (single Insights entry, drop old 8)",
-    "status": "pending"
+    "status": "completed"
   },
   {
-    "content": "Redirects from old URLs",
-    "status": "pending"
+    "content": "All legacy URL redirects (8 + manager engagement) → Insights",
+    "status": "completed"
   },
   {
-    "content": "Test end-to-end with testing_agent_v3",
-    "status": "pending"
+    "content": "Role-aware verification (admin=COMPANY, manager=PERSONAL, Team hidden)",
+    "status": "completed"
+  },
+  {
+    "content": "End-to-end testing",
+    "status": "completed"
   }
 ]
