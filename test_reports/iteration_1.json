@@ -1,0 +1,88 @@
+{
+  "summary": "Completed comprehensive testing of Wave 8 Insights Hub consolidation. Backend APIs fully functional (28/29 tests passed). Frontend UI renders correctly with all 5 vertical tabs, 6 KPI tiles, deep Risk & Alerts sections, and role-aware behavior (admin=COMPANY scope with 5 tabs, manager=PERSONAL scope with 4 tabs, Team tab hidden). Sidebar successfully consolidated from 8 entries to 1 'Analytics & Insights' entry. Found 2 legacy URL redirect issues.",
+  
+  "backend_issues": {
+    "critical_bugs": [],
+    "flaky_endpoints": [],
+    "notes": "One expected 403 error for manager accessing admin-only /api/admin/kpi/dashboard endpoint - this is correct role-based access control, not a bug."
+  },
+  
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Legacy URL redirects",
+        "issue": "/admin/risk and /admin/journey do NOT redirect to /admin/insights - they still load old standalone pages (RiskDashboardPage, JourneyPage)",
+        "expected": "Should redirect to /admin/insights?tab=risk and /admin/insights?tab=pipeline respectively",
+        "affected_routes": ["/admin/risk", "/admin/journey"],
+        "fix_priority": "HIGH",
+        "location": "/app/frontend/src/App.js lines 588-589"
+      }
+    ],
+    "design_issues": []
+  },
+  
+  "passed_tests": [
+    "Backend: System health endpoint (200)",
+    "Backend: Admin login with correct credentials",
+    "Backend: Manager login with correct credentials",
+    "Backend: All 26 Insights hub endpoints return 200 (KPI dashboard, leaderboard, owner dashboard, journey funnel/bottlenecks/durations, alerts, escalations, intent, engagement, contracts, documents, team endpoints, login audit, analytics)",
+    "Frontend: /admin/insights page loads without errors",
+    "Frontend: KPI strip renders with 6 tiles (Revenue MTD, Active Leads, Win Rate, Avg Cycle Time, Risk Score, Critical Alerts)",
+    "Frontend: All 5 vertical tabs present (Traffic & Engagement, Pipeline, Revenue, Team & Managers, Risk & Alerts)",
+    "Frontend: Tab switching works correctly",
+    "Frontend: Risk & Alerts tab renders ALL 6 deep sections (Risk Overview with composite score + 14-day chart, Risk Drivers list, Risk by Entity card with manager/team/deal subtabs, Critical Alerts card with severity filters + refresh, Escalation Queue card with table, Stuck Items card with segmented filter)",
+    "Frontend: Traffic & Engagement tab renders",
+    "Frontend: Pipeline tab renders with Leads/Deals subtabs",
+    "Frontend: Revenue tab renders",
+    "Frontend: Team & Managers tab renders (admin only)",
+    "Frontend: Role-aware behavior - Admin sees scope badge 'COMPANY' and all 5 tabs",
+    "Frontend: Role-aware behavior - Manager sees scope badge 'PERSONAL' and only 4 tabs (Team tab correctly hidden)",
+    "Frontend: Sidebar consolidation - Single 'Analytics & Insights' entry present",
+    "Frontend: Sidebar consolidation - All 8 old entries removed (analytics, owner-dashboard, journey, risk, escalations, documents, contracts-accounting, intent)",
+    "Frontend: Legacy redirect /admin/analytics → /admin/insights?tab=traffic works correctly"
+  ],
+  
+  "test_report_links": [
+    "/app/backend/insights_test.py",
+    "/app/.screenshots/insights-page-loaded.png",
+    "/app/.screenshots/insights-risk-tab.png",
+    "/app/.screenshots/insights-traffic-tab.png",
+    "/app/.screenshots/insights-pipeline-tab.png",
+    "/app/.screenshots/insights-revenue-tab.png",
+    "/app/.screenshots/insights-team-tab.png",
+    "/app/.screenshots/insights-manager-role.png",
+    "/app/.screenshots/sidebar-check.png"
+  ],
+  
+  "action_item_for_main_agent": {
+    "priority": "HIGH",
+    "items": [
+      {
+        "issue": "Legacy URL redirects incomplete",
+        "details": "Routes /admin/risk and /admin/journey still load old standalone pages instead of redirecting to /admin/insights with appropriate tab parameter",
+        "fix": "Update /app/frontend/src/App.js lines 588-589 to redirect: <Route path='risk' element={<Navigate to='/admin/insights?tab=risk' replace />} /> and <Route path='journey' element={<Navigate to='/admin/insights?tab=pipeline' replace />} />",
+        "affected_routes": ["/admin/risk", "/admin/journey"],
+        "test_verification": "After fix, verify /admin/risk redirects to /admin/insights?tab=risk and /admin/journey redirects to /admin/insights?tab=pipeline"
+      },
+      {
+        "issue": "Complete legacy redirect testing",
+        "details": "Test remaining legacy URLs: /admin/escalations, /admin/contracts/accounting, /admin/documents, /admin/owner-dashboard, /admin/intent, /admin/engagement",
+        "priority": "MEDIUM"
+      }
+    ]
+  },
+  
+  "updated_files": [
+    "/app/backend/insights_test.py"
+  ],
+  
+  "success_percentage": {
+    "backend": "96.5% (28/29 tests passed, 1 expected 403 for role-based access control)",
+    "frontend_ui": "100% (all UI elements render correctly, tabs switch, role-aware behavior works)",
+    "frontend_integration": "33% (1/3 legacy redirects tested work, 2 fail)"
+  },
+  
+  "should_call_test_agent_after_fix": "false",
+  "should_main_agent_test_itself": "true"
+}

@@ -1,42 +1,46 @@
 [
   {
-    "content": "Design guidelines for Insights hub (design_agent)",
+    "content": "Design guidelines for Insights hub",
+    "status": "completed"
+  },
+  {
+    "content": "Read design_guidelines.md fully",
     "status": "in_progress"
   },
   {
     "content": "Audit backend endpoints for all 5 verticals",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Build /insights skeleton + KPI strip + tab nav (role-aware)",
     "status": "pending"
   },
   {
-    "content": "Vertical 1: Traffic & Engagement (Analytics + UserEngagement + Intent merged)",
+    "content": "Vertical 1: Traffic & Engagement",
     "status": "pending"
   },
   {
-    "content": "Vertical 2: Pipeline (Leads sub-tab + Deals sub-tab with funnel/bottlenecks/cycle)",
+    "content": "Vertical 2: Pipeline (Leads + Deals)",
     "status": "pending"
   },
   {
-    "content": "Vertical 3: Revenue (Payments + Contracts + Documents merged, AR ageing)",
+    "content": "Vertical 3: Revenue (Payments + Contracts + Documents)",
     "status": "pending"
   },
   {
-    "content": "Vertical 4: Team & Managers (Scorecards + Load + SLA + Login Audit)",
+    "content": "Vertical 4: Team & Managers",
     "status": "pending"
   },
   {
-    "content": "Vertical 5: Risk & Alerts (DEEP — composite score + alerts + escalations + stuck items)",
+    "content": "Vertical 5: Risk & Alerts (DEEP)",
     "status": "pending"
   },
   {
-    "content": "Rewire sidebar: replace 8 entries with single Insights entry",
+    "content": "Rewire sidebar (single Insights entry, drop old 8)",
     "status": "pending"
   },
   {
-    "content": "Add 301 redirects from old URLs",
+    "content": "Redirects from old URLs",
     "status": "pending"
   },
   {

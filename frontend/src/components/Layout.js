@@ -319,16 +319,13 @@ const Layout = () => {
       roles: ['master_admin', 'admin', 'team_lead', 'manager']
     },
     {
-      // Wave 7.5 — User Engagement is now a TOP-LEVEL item (out of the
-      // "Analytics" group) and the single source of truth for customer
-      // favorites / compare / shares. The previous read-only mirror at
-      // /manager/engagement is REMOVED — same page now serves all staff
-      // roles via the consolidated /admin/engagement route, gated by
-      // require_manager_or_admin on the backend.
+      // Wave-8 — User Engagement folded into /admin/insights → Traffic & Engagement tab.
+      // The standalone entry is removed; we keep the route alias above for old bookmarks.
+      // Old top-level item removed (was here in Wave 7.5).
       id: 'userEngagement',
       type: 'single',
-      item: { path: '/admin/engagement', icon: Heart, labelKey: 'userEngagement' },
-      roles: ['master_admin', 'admin', 'team_lead', 'manager', 'moderator']
+      item: { path: '/admin/insights?tab=traffic', icon: Heart, labelKey: 'userEngagement' },
+      roles: []  // hidden — accessible inside Insights → Traffic tab
     },
     {
       // «Top Deals Builder» — основная рабочая страница менеджера для
@@ -406,25 +403,34 @@ const Layout = () => {
       roles: ['master_admin', 'moderator', 'admin']
     },
     {
-      id: 'analytics',
-      type: 'group',
-      labelKey: 'analyticsAndInsights',
-      icon: Megaphone,
-      items: [
-        { path: '/admin/analytics', icon: ChartBar, labelKey: 'analytics' },
-        { path: '/admin/owner-dashboard', icon: ChartLine, labelKey: 'paymentAnalytics', roles: ['master_admin', 'admin'] },
-        { path: '/admin/journey', icon: ChartLineUp, labelKey: 'journeyFunnel' },
-        { path: '/admin/risk', icon: Shield, labelKey: 'riskDashboard' },
-        { path: '/admin/escalations', icon: Lightning, labelKey: 'priorityAlerts' },
-        { path: '/admin/documents', icon: Receipt, labelKey: 'documents' },
-        { path: '/admin/contracts/accounting', icon: FileText, labelKey: 'contractsAccounting' },
-        { path: '/admin/intent', icon: TrendUp, labelKey: 'intentDashboard' },
-        // /admin/engagement promoted to a TOP-LEVEL sidebar item in Wave 7.5
-        // — see the `userEngagement` group above (no longer nested under Analytics).
-        // ❌ REMOVED: auto-call (Twilio deprecated)
-        // ❌ REMOVED: marketing control (не используется)
-      ],
-      roles: ['master_admin', 'moderator', 'admin', 'team_lead']
+      // Wave-8 — Insights Hub.
+      // Replaces the legacy "Analytics & Insights" group (8 sub-items):
+      //   Analytics · Payment Analytics · Journey Funnel · Risk Dashboard ·
+      //   Priority Alerts · Documents · Contracts Accounting · Intent Dashboard.
+      // All of those are now horizontal sub-tabs INSIDE /admin/insights, with
+      // role-aware scoping (admin → company, team_lead → team, manager → personal).
+      // Old URLs still work via 301-style redirects in App.js routing.
+      id: 'insights',
+      type: 'single',
+      item: {
+        path: '/admin/insights',
+        icon: ChartBar,
+        labelKey: 'analyticsAndInsights',
+        matchPrefix: true,
+        // keep highlight when user lands on a legacy alias (before redirect kicks in)
+        extraMatch: [
+          '/admin/analytics',
+          '/admin/owner-dashboard',
+          '/admin/journey',
+          '/admin/risk',
+          '/admin/escalations',
+          '/admin/documents',
+          '/admin/contracts/accounting',
+          '/admin/intent',
+          '/admin/engagement',
+        ],
+      },
+      roles: ['master_admin', 'moderator', 'admin', 'team_lead', 'manager']
     }
   ];
 

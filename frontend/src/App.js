@@ -75,6 +75,7 @@ import ParserSettings from './pages/ParserSettings';
 import CalculatorAdmin from './pages/CalculatorAdmin';
 import Customer360 from './pages/Customer360';
 import AdminAnalyticsDashboard from './components/AdminAnalyticsDashboard';
+import InsightsPage from './pages/InsightsPage';
 import AdminBusinessMetricsPage from './pages/admin/AdminBusinessMetricsPage';
 import ProviderHealthPage from './pages/admin/ProviderHealthPage';
 import MarketingControlPanel from './components/MarketingControlPanel';
@@ -513,7 +514,8 @@ function App() {
               <Route path="deposits" element={<Navigate to="/admin/legal?tab=deposit_v2" replace />} />
               <Route path="tasks" element={<Tasks />} />
               <Route path="staff" element={<Staff />} />
-              <Route path="documents" element={<Documents />} />
+              <Route path="documents" element={<Navigate to="/admin/insights?tab=revenue" replace />} />
+              <Route path="documents-legacy" element={<Documents />} />
               <Route path="settings" element={<SystemPage />} />
               <Route path="settings/auth" element={<Navigate to="/admin/settings?tab=auth" replace />} />
               <Route path="info" element={<AdminInfoPage />} />
@@ -534,7 +536,13 @@ function App() {
                    of functionality already covered by /admin/parser/settings.
                   ❌ REMOVED: /admin/vehicles (catalog rudiment) and /admin/analytics/quotes (mock-only data) */}
               <Route path="calculator" element={<CalculatorAdmin />} />
-              <Route path="analytics" element={<AdminAnalyticsDashboard />} />
+              {/* ═══════════════════ NEW INSIGHTS HUB ═══════════════════
+                * Single role-aware Analytics + Risk + Revenue + Pipeline + Team hub.
+                * Replaces 8 legacy sidebar entries. Old URLs are redirected below. */}
+              <Route path="insights" element={<InsightsPage />} />
+              {/* Legacy aliases (preserve old deep-links / bookmarks). */}
+              <Route path="analytics" element={<Navigate to="/admin/insights?tab=traffic" replace />} />
+              <Route path="analytics-legacy" element={<AdminAnalyticsDashboard />} />
               <Route path="business-metrics" element={<AdminBusinessMetricsPage />} />
               <Route path="provider-health" element={<ProviderHealthPage />} />
               {/* ❌ REMOVED: marketing control (не используется, логика неясна) */}
@@ -542,8 +550,10 @@ function App() {
               <Route path="moderation" element={<ModerationPage />} />
               <Route path="listings/moderation" element={<ModerationPage />} />
               <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="intent" element={<IntentDashboard />} />
-              <Route path="engagement" element={<UserEngagementPage />} />
+              <Route path="intent" element={<Navigate to="/admin/insights?tab=traffic" replace />} />
+              <Route path="intent-legacy" element={<IntentDashboard />} />
+              <Route path="engagement" element={<Navigate to="/admin/insights?tab=traffic" replace />} />
+              <Route path="engagement-legacy" element={<UserEngagementPage />} />
               {/* Twilio & auto-call removed - use /admin/ringostat */}
               <Route path="history-reports" element={<HistoryReportsAdmin />} />
               <Route path="staff-sessions" element={<StaffSessionsBoard />} />
@@ -606,7 +616,8 @@ function App() {
               <Route path="identity/exceptions" element={<Navigate to="/admin/tracking/exceptions/automation" replace />} />
               <Route path="ext-clients" element={<Navigate to="/admin/tracking/ext-clients" replace />} />
               <Route path="shipment-journey" element={<Navigate to="/admin/tracking/shipments" replace />} />
-              <Route path="owner-dashboard" element={<OwnerPaymentDashboard />} />
+              <Route path="owner-dashboard" element={<Navigate to="/admin/insights?tab=revenue" replace />} />
+              <Route path="owner-dashboard-legacy" element={<OwnerPaymentDashboard />} />
               <Route path="invoice-reminders" element={<InvoiceRemindersDashboard />} />
 
               {/* Catch-all for unknown /admin/* routes — redirects to dashboard.
