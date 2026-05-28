@@ -4599,6 +4599,35 @@ async def health():
     except Exception:
         mongo_ok = False
 
+    # Wave-8.2 — supervised worker snapshot (best-effort; never break health probe).
+    # Lets ops monitor see if escalation-wakeup / payment-reminder / tracking / etc.
+    # are running, how many times they restarted, and when they last booted.
+    workers_status: Dict[str, Any] = {"available": False}
+    try:
+        from app.core.worker_registry import worker_registry as _wr_health
+        snapshot = _wr_health.status()
+        summary = _wr_health.status_summary()
+        workers_status = {
+            "available": True,
+            "summary": summary,
+            # Trim each row to a stable, JSON-safe subset (no asyncio.Task etc.)
+            "workers": [
+                {
+                    "name": w.get("name"),
+                    "state": w.get("state"),
+                    "restarts": w.get("restarts", 0),
+                    "max_restarts": w.get("max_restarts"),
+                    "critical": w.get("critical", False),
+                    "started_at": w.get("started_at"),
+                    "last_error": w.get("last_error"),
+                    "last_error_at": w.get("last_error_at"),
+                }
+                for w in snapshot
+            ],
+        }
+    except Exception as _e:  # noqa: BLE001
+        workers_status = {"available": False, "error": str(_e)}
+
     return {
         "status": "healthy" if mongo_ok else "degraded",
         "service": "bibi-v3.2",
@@ -4609,6 +4638,7 @@ async def health():
         "parser_enabled": parser_config.enabled,
         "mongo_ok": mongo_ok,
         "observability": observability,
+        "workers": workers_status,
         "ts": datetime.now(timezone.utc).isoformat(),
     }
 

@@ -14,6 +14,7 @@ import { CurrencyDollar, FileText, Receipt, Download } from '@phosphor-icons/rea
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtMoney, fmtCompact } from '../shared/insightsApi';
 import { API_URL } from '../../../App';
+import ContractDrillSheet from '../shared/ContractDrillSheet';
 
 const RevenueVertical = ({ scope, period = 30 }) => {
   const [loading, setLoading] = useState(true);
@@ -22,6 +23,7 @@ const RevenueVertical = ({ scope, period = 30 }) => {
   const [docs, setDocs] = useState([]);
   const [pending, setPending] = useState([]);
   const [bucketFilter, setBucketFilter] = useState('all');
+  const [drillContract, setDrillContract] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -137,7 +139,7 @@ const RevenueVertical = ({ scope, period = 30 }) => {
                 </tr></thead>
                 <tbody>
                   {visibleContracts.slice(0, 100).map((c, i) => (
-                    <tr key={c._id || c.id || i} className="border-b border-zinc-50 hover:bg-zinc-50">
+                    <tr key={c._id || c.id || i} className="cursor-pointer border-b border-zinc-50 hover:bg-zinc-50" onClick={() => setDrillContract(c)} data-testid={`insights-contract-row-${i}`}>
                       <td className="px-4 py-2 font-medium text-zinc-900">{c.title || c.contractNumber || c.dealTitle || c._id}</td>
                       <td className="px-4 py-2 text-zinc-700">{c.customerName || c.customer || '—'}</td>
                       <td className="px-4 py-2 text-zinc-700">{c.managerEmail || c.owner || '—'}</td>
@@ -194,6 +196,9 @@ const RevenueVertical = ({ scope, period = 30 }) => {
           </InsightsCard>
         </div>
       </InsightsSection>
+
+      {/* Contract drill-down sheet — opens on contract row click */}
+      <ContractDrillSheet open={!!drillContract} onOpenChange={(o) => !o && setDrillContract(null)} contract={drillContract} />
     </motion.div>
   );
 };

@@ -18,6 +18,7 @@ import { API_URL } from '../../../App';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip, SeverityDot } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtMoney, riskBandClass } from '../shared/insightsApi';
 import ReassignPopover from '../shared/ReassignPopover';
+import ManagerDrillSheet from '../shared/ManagerDrillSheet';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 
@@ -104,7 +105,7 @@ function RiskByEntitySection({ entities, onOpenManager }) {
               {rows.map((r, i) => {
                 const band = riskBandClass(r.score);
                 return (
-                  <tr key={r.id || i} className="border-b border-zinc-50 hover:bg-zinc-50" onClick={() => onOpenManager?.(r)}>
+                  <tr key={r.id || i} className="cursor-pointer border-b border-zinc-50 hover:bg-zinc-50" onClick={() => onOpenManager?.(r)} data-testid={`insights-risk-entity-row-${i}`}>
                     <td className="py-2 pr-3">
                       <div className="flex items-center gap-2">
                         <span className={`inline-block h-6 w-1 rounded ${band.bg.replace('bg-','bg-')}`} />
@@ -281,6 +282,7 @@ const RiskAlertsVertical = ({ scope }) => {
   const [stuck, setStuck] = useState([]);
   const [severity, setSeverity] = useState('all');
   const [openItem, setOpenItem] = useState(null);
+  const [drillManager, setDrillManager] = useState(null);
   const [refreshTick, setRefreshTick] = useState(0);
 
   useEffect(() => {
@@ -325,6 +327,9 @@ const RiskAlertsVertical = ({ scope }) => {
         const baseRisk = Math.max(0, Math.min(100, 100 - conv));
         return {
           id: m.id,
+          email: m.email,                 // forward to ManagerDrillSheet for scoped queries
+          ownerEmail: m.email,
+          role: m.role,
           name: m.name || m.email || 'Manager',
           score: Math.round(baseRisk),
           openAlerts: allAlerts.filter(a => (a.owner || a.ownerEmail) === m.email).length,
@@ -415,7 +420,7 @@ const RiskAlertsVertical = ({ scope }) => {
         <RiskOverviewSection data={overview} />
       </InsightsSection>
       <InsightsSection id="risk-by-entity" title="Risk by Manager / Team / Deal" subtitle="Drill into ranking by entity">
-        <RiskByEntitySection entities={entities} onOpenManager={setOpenItem} />
+        <RiskByEntitySection entities={entities} onOpenManager={setDrillManager} />
       </InsightsSection>
       <InsightsSection id="critical-alerts-feed" title="Critical Alerts · Live Feed" subtitle="Filter by severity · click cell for timeline">
         <CriticalAlertsFeed alerts={alerts} onOpen={setOpenItem} severity={severity} setSeverity={setSeverity} onRefresh={() => setRefreshTick(t => t+1)} />
@@ -427,6 +432,11 @@ const RiskAlertsVertical = ({ scope }) => {
         <StuckItems items={stuck} />
       </InsightsSection>
 
+      {/* Deep manager drill-down — opens on click in "Risk by Manager" rows */}
+      <ManagerDrillSheet open={!!drillManager} onOpenChange={(o) => !o && setDrillManager(null)} manager={drillManager} />
+
+      {/* Lightweight raw-detail sheet — still used for Alerts feed + Escalation rows
+          (those don't have a dedicated drill-down primitive yet). */}
       <Sheet open={!!openItem} onOpenChange={(o) => !o && setOpenItem(null)}>
         <SheetContent side="right" className="w-full sm:max-w-xl">
           <SheetHeader>

@@ -1,38 +1,26 @@
 [
   {
-    "content": "Create modular escalations wakeup worker (app/workers/)",
+    "content": "Create ContractDrillSheet shared primitive",
     "status": "completed"
   },
   {
-    "content": "Register worker via worker_registry (no monolith additions)",
+    "content": "Wire ContractDrillSheet into RevenueVertical contracts table",
     "status": "completed"
   },
   {
-    "content": "Verify wakeup loop: snoozed -> open + notification emit",
+    "content": "Wire ManagerDrillSheet into RiskAlertsVertical 'Risk by Manager' rows",
     "status": "completed"
   },
   {
-    "content": "Create DealDrillSheet shared primitive",
+    "content": "Inspect worker_registry status API surface",
     "status": "completed"
   },
   {
-    "content": "Create ReassignPopover shared primitive",
+    "content": "Extend /api/system/health with workers[] status section",
     "status": "completed"
   },
   {
-    "content": "Wire DealDrillSheet into PipelineVertical (bottlenecks + cycle rows)",
-    "status": "completed"
-  },
-  {
-    "content": "Wire ReassignPopover into RiskAlertsVertical EscalationQueue",
-    "status": "completed"
-  },
-  {
-    "content": "Verify reassign POST flow end-to-end (UI + backend persistence)",
-    "status": "completed"
-  },
-  {
-    "content": "Lint + frontend rebuild clean",
+    "content": "End-to-end verification (3 features)",
     "status": "completed"
   }
 ]
