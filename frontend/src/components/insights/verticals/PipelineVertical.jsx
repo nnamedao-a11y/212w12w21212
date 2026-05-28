@@ -9,6 +9,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { TrendUp, UsersThree, Clock, Target } from '@phosphor-icons/react';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtDuration, fmtPct } from '../shared/insightsApi';
+import DealDrillSheet from '../shared/DealDrillSheet';
 
 function LeadsTab({ scope, period }) {
   const [loading, setLoading] = useState(true);
@@ -169,9 +170,16 @@ function DealsTab({ scope, period }) {
           {bottle.length === 0 ? <InsightsEmpty title="No bottlenecks" /> : (
             <ul className="space-y-2">
               {bottle.slice(0, 6).map((b, i) => (
-                <li key={i} className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2">
-                  <div><p className="text-sm font-medium text-zinc-900">{b.stage || b.name}</p><p className="text-[11px] text-zinc-500">avg {fmtDuration(b.avgDays || b.avg || 0)}</p></div>
-                  <MetricChip value={fmtCompact(b.stuck || b.count || 0)} tone="warning" />
+                <li key={i}>
+                  <button
+                    type="button"
+                    onClick={() => setDrillStage({ stage: b.stage || b.name, avgDays: b.avgDays || b.avg, stuck: b.stuck || b.count, bottleneck: true })}
+                    data-testid={`insights-bottleneck-row-${i}`}
+                    className="flex w-full items-center justify-between rounded-lg border border-zinc-100 px-3 py-2 text-left hover:border-zinc-300 hover:bg-zinc-50"
+                  >
+                    <div><p className="text-sm font-medium text-zinc-900">{b.stage || b.name}</p><p className="text-[11px] text-zinc-500">avg {fmtDuration(b.avgDays || b.avg || 0)}</p></div>
+                    <MetricChip value={fmtCompact(b.stuck || b.count || 0)} tone="warning" />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -191,7 +199,7 @@ function DealsTab({ scope, period }) {
               </tr></thead>
               <tbody>
                 {durations.map((d, i) => (
-                  <tr key={i} className="border-b border-zinc-50 hover:bg-zinc-50">
+                  <tr key={i} className="cursor-pointer border-b border-zinc-50 hover:bg-zinc-50" onClick={() => setDrillStage({ stage: d.stage || d.name, avgDays: d.avgDays || d.avg, p75Days: d.p75Days || d.p75 })} data-testid={`insights-cycle-row-${i}`}>
                     <td className="px-4 py-2 font-medium text-zinc-900">{d.stage || d.name}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{fmtDuration(d.avgDays || d.avg)}</td>
                     <td className="px-4 py-2 text-right tabular-nums">{fmtDuration(d.p75Days || d.p75)}</td>
@@ -203,6 +211,9 @@ function DealsTab({ scope, period }) {
           </div>
         )}
       </InsightsCard>
+
+      {/* Deal drill-down sheet — opens on bottleneck / cycle-row click */}
+      <DealDrillSheet open={!!drillStage} onOpenChange={(o) => !o && setDrillStage(null)} deal={drillStage} stage={drillStage?.stage} />
     </div>
   );
 }

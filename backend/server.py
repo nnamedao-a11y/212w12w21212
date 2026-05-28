@@ -2264,6 +2264,34 @@ async def _main_startup():
     except Exception:
         logger.exception("[notif] failed to initialise NotificationService")
 
+    # ── Wave-8 · Insights / Risk & Alerts · escalation wake-up worker ──
+    # Modular worker that returns snoozed escalations to the active queue
+    # once their `snoozedUntil` elapses, and emits a real-time notification.
+    # Implementation lives in app/workers/escalations_wakeup_worker.py to
+    # keep server.py clean and the worker independently testable.
+    try:
+        from app.workers import escalations_wakeup_worker as _esc_wakeup
+        _esc_wakeup.init(db=db, sio=sio)
+        from app.core.worker_registry import worker_registry as _wr_esc
+        _wr_esc.register(
+            "escalations_wakeup",
+            _esc_wakeup.loop,
+            restart_policy="on_failure",
+            critical=False,                # manual refresh always works as fallback
+            restart_backoff_sec=30.0,
+            max_restarts=5,
+        )
+        logger.info("[esc_wakeup] worker registered (worker_registry)")
+    except Exception as _e:
+        logger.exception("[esc_wakeup] worker registration failed (fallback to legacy create_task): %s", _e)
+        try:
+            from app.workers import escalations_wakeup_worker as _esc_wakeup_fb
+            _esc_wakeup_fb.init(db=db, sio=sio)
+            asyncio.create_task(_esc_wakeup_fb.loop())
+            logger.info("[esc_wakeup] worker started via legacy create_task")
+        except Exception:
+            logger.exception("[esc_wakeup] BOTH paths failed — worker NOT running")
+
     # ── Provider Pressure engine (score / tier / matching / notify) ──
     try:
         import provider_stats as _ps

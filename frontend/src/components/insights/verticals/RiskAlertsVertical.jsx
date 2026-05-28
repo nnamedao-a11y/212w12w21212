@@ -17,6 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { API_URL } from '../../../App';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip, SeverityDot } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtMoney, riskBandClass } from '../shared/insightsApi';
+import ReassignPopover from '../shared/ReassignPopover';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 
@@ -202,8 +203,13 @@ function EscalationQueue({ escalations, onOpen, onAction }) {
                   <td className="px-4 py-2 text-right">{breached ? <MetricChip value="BREACHED" tone="negative" /> : dueSoon ? <MetricChip value="Due soon" tone="warning" /> : <MetricChip value="On track" tone="positive" />}</td>
                   <td className="px-4 py-2 text-right">
                     <div className="inline-flex items-center gap-1">
-                      <button onClick={() => onAction?.('resolve', e)} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50"><CheckCircle size={11} className="mr-0.5 inline" />Resolve</button>
-                      <button onClick={() => onAction?.('snooze', e)} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50"><Snowflake size={11} className="mr-0.5 inline" />Snooze</button>
+                      <button onClick={() => onAction?.('resolve', e)} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50" data-testid={`insights-escalation-resolve-${i}`}><CheckCircle size={11} className="mr-0.5 inline" />Resolve</button>
+                      <button onClick={() => onAction?.('snooze', e)} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50" data-testid={`insights-escalation-snooze-${i}`}><Snowflake size={11} className="mr-0.5 inline" />Snooze</button>
+                      <ReassignPopover
+                        testId={`insights-escalation-reassign-${i}`}
+                        currentOwner={e.owner || e.ownerEmail || e.assignedTo}
+                        onSubmit={(newOwner) => onAction?.('reassign', e, { owner: newOwner })}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -375,17 +381,30 @@ const RiskAlertsVertical = ({ scope }) => {
     return () => { alive = false; };
   }, [refreshTick, scope]);
 
-  const handleAction = async (action, item) => {
+  const handleAction = async (action, item, extra = {}) => {
     try {
+      const id = item._id || item.id;
+      if (!id) return;
       if (action === 'resolve') {
-        await axios.post(`${API_URL}/api/escalations/${item._id || item.id}/resolve`);
-        setEscalations(prev => prev.filter(e => (e._id || e.id) !== (item._id || item.id)));
+        await axios.post(`${API_URL}/api/escalations/${id}/resolve`, { actor: 'admin' });
+        setEscalations(prev => prev.filter(e => (e._id || e.id) !== id));
       } else if (action === 'snooze') {
-        // Snooze stub — backend may not support yet; best-effort fire-and-forget
-        try { await axios.post(`${API_URL}/api/escalations/${item._id || item.id}/snooze`, { hours: 4 }); } catch {}
-        setEscalations(prev => prev.filter(e => (e._id || e.id) !== (item._id || item.id)));
+        await axios.post(`${API_URL}/api/escalations/${id}/snooze`, { hours: 4, actor: 'admin' });
+        // Optimistic: remove from queue — worker will surface it again when due
+        setEscalations(prev => prev.filter(e => (e._id || e.id) !== id));
+      } else if (action === 'reassign') {
+        const newOwner = extra?.owner;
+        if (!newOwner) return;
+        await axios.post(`${API_URL}/api/escalations/${id}/reassign`, { owner: newOwner, actor: 'admin' });
+        setEscalations(prev => prev.map(e => (e._id || e.id) === id
+          ? { ...e, owner: newOwner, ownerEmail: newOwner, assignedTo: newOwner }
+          : e
+        ));
       }
-    } catch {}
+    } catch (err) {
+      // surface a soft inline error — full toast system is out of scope here
+      console.error('[insights] escalation action failed', action, err);
+    }
   };
 
   if (loading) return <InsightsLoading rows={8} />;

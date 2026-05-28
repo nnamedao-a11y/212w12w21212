@@ -1,26 +1,38 @@
 [
   {
-    "content": "Unsticky page header (scroll away with content)",
+    "content": "Create modular escalations wakeup worker (app/workers/)",
     "status": "completed"
   },
   {
-    "content": "Add backend POST /api/escalations/{id}/snooze + /resolve + /reassign endpoints",
+    "content": "Register worker via worker_registry (no monolith additions)",
     "status": "completed"
   },
   {
-    "content": "Add Customer drill-down Sheet in TrafficVertical",
+    "content": "Verify wakeup loop: snoozed -> open + notification emit",
     "status": "completed"
   },
   {
-    "content": "Add Manager drill-down Sheet in TeamManagersVertical",
+    "content": "Create DealDrillSheet shared primitive",
     "status": "completed"
   },
   {
-    "content": "Filter snoozed/resolved out of /api/escalations queue",
+    "content": "Create ReassignPopover shared primitive",
     "status": "completed"
   },
   {
-    "content": "End-to-end verification (header scroll, drill-downs, snooze API)",
+    "content": "Wire DealDrillSheet into PipelineVertical (bottlenecks + cycle rows)",
+    "status": "completed"
+  },
+  {
+    "content": "Wire ReassignPopover into RiskAlertsVertical EscalationQueue",
+    "status": "completed"
+  },
+  {
+    "content": "Verify reassign POST flow end-to-end (UI + backend persistence)",
+    "status": "completed"
+  },
+  {
+    "content": "Lint + frontend rebuild clean",
     "status": "completed"
   }
 ]
