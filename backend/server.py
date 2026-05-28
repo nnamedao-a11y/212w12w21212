@@ -14775,9 +14775,25 @@ async def create_docusign_envelope(data: Dict[str, Any] = Body(...)):
 # ═══════════════════════════════════════════════════════════════════
 
 @fastapi_app.get("/api/escalations")
-async def list_escalations(limit: int = 50):
-    """List escalations - returns direct array"""
-    cursor = db.escalations.find({}, {'_id': 0}).limit(limit)
+async def list_escalations(limit: int = 50, includeSnoozed: bool = False, includeResolved: bool = False):
+    """List escalations - returns direct array.
+    Wave-8: by default hides resolved/snoozed-and-not-yet-due rows so the Insights queue is clean.
+    """
+    now_iso = datetime.now(timezone.utc).isoformat()
+    or_conditions: List[Dict[str, Any]] = []
+    if not includeResolved:
+        or_conditions.append({"status": {"$ne": "resolved"}})
+    if not includeSnoozed:
+        # Show snoozed rows whose snoozedUntil has elapsed (back in queue),
+        # hide currently-snoozed ones.
+        or_conditions.append({
+            "$or": [
+                {"status": {"$ne": "snoozed"}},
+                {"snoozedUntil": {"$lte": now_iso}},
+            ]
+        })
+    query: Dict[str, Any] = {"$and": or_conditions} if or_conditions else {}
+    cursor = db.escalations.find(query, {'_id': 0}).limit(limit)
     items = await cursor.to_list(length=limit)
     return items if items else []
 
@@ -14818,6 +14834,73 @@ async def resolve_escalation(escalation_id: str, data: Dict[str, Any] = Body(...
     """Resolve escalation"""
     await db.escalations.update_one({"_id": escalation_id}, {"$set": {"status": "resolved"}})
     return {"success": True}
+
+# Wave-8: Also accept POST (frontend Insights → Escalation Queue uses POST for inline action)
+@fastapi_app.post("/api/escalations/{escalation_id}/resolve")
+async def resolve_escalation_post(escalation_id: str, data: Dict[str, Any] = Body(default={})):
+    """Resolve escalation (POST alias used by Insights → Risk & Alerts → Escalation Queue)."""
+    now_iso = datetime.now(timezone.utc).isoformat()
+    res = await db.escalations.update_one(
+        {"$or": [{"_id": escalation_id}, {"id": escalation_id}]},
+        {"$set": {"status": "resolved", "resolvedAt": now_iso, "resolvedBy": (data.get("actor") if isinstance(data, dict) else None)}}
+    )
+    return {"success": True, "matched": res.matched_count, "modified": res.modified_count}
+
+@fastapi_app.post("/api/escalations/{escalation_id}/snooze")
+async def snooze_escalation(escalation_id: str, data: Dict[str, Any] = Body(default={})):
+    """
+    Snooze an escalation for N hours.
+    Body: { "hours": <int, default 4>, "actor": <optional email/id>, "reason": <optional> }
+    The snoozed escalation is hidden from queues until snoozedUntil <= now.
+    """
+    hours = int((data or {}).get("hours") or 4)
+    hours = max(1, min(hours, 24 * 14))  # clamp 1h .. 14d
+    now = datetime.now(timezone.utc)
+    snoozed_until = (now + timedelta(hours=hours)).isoformat()
+    actor = (data or {}).get("actor")
+    reason = (data or {}).get("reason")
+    update = {
+        "status": "snoozed",
+        "snoozedUntil": snoozed_until,
+        "snoozedAt": now.isoformat(),
+        "snoozedHours": hours,
+    }
+    if actor:
+        update["snoozedBy"] = actor
+    if reason:
+        update["snoozeReason"] = reason
+    res = await db.escalations.update_one(
+        {"$or": [{"_id": escalation_id}, {"id": escalation_id}]},
+        {"$set": update}
+    )
+    return {
+        "success": True,
+        "matched": res.matched_count,
+        "modified": res.modified_count,
+        "snoozedUntil": snoozed_until,
+        "hours": hours,
+    }
+
+@fastapi_app.post("/api/escalations/{escalation_id}/reassign")
+async def reassign_escalation(escalation_id: str, data: Dict[str, Any] = Body(...)):
+    """Reassign an escalation to another owner. Body: { "owner": <email>, "actor": <optional> }"""
+    owner = (data or {}).get("owner") or (data or {}).get("assignTo")
+    if not owner:
+        raise HTTPException(status_code=400, detail="owner is required")
+    now_iso = datetime.now(timezone.utc).isoformat()
+    update = {
+        "owner": owner,
+        "ownerEmail": owner,
+        "assignedTo": owner,
+        "reassignedAt": now_iso,
+        "reassignedBy": (data or {}).get("actor"),
+        "status": "open",
+    }
+    res = await db.escalations.update_one(
+        {"$or": [{"_id": escalation_id}, {"id": escalation_id}]},
+        {"$set": update}
+    )
+    return {"success": True, "matched": res.matched_count, "owner": owner}
 
 @fastapi_app.put("/api/escalations/{escalation_id}")
 async def update_escalation(escalation_id: str, data: Dict[str, Any] = Body(...)):

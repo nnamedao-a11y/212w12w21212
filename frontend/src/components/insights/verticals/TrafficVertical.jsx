@@ -14,6 +14,7 @@ import { ResponsiveContainer, FunnelChart, Funnel, LabelList, BarChart, Bar, XAx
 import { Heart, Eye, ShareNetwork, Scales, Flame, ArrowsLeftRight } from '@phosphor-icons/react';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtPct, fmtMoney } from '../shared/insightsApi';
+import CustomerDrillSheet from '../shared/CustomerDrillSheet';
 
 const TrafficVertical = ({ scope, period = 30 }) => {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,7 @@ const TrafficVertical = ({ scope, period = 30 }) => {
   const [topUsers, setTopUsers] = useState([]);
   const [topVehicles, setTopVehicles] = useState([]);
   const [hotLeads, setHotLeads] = useState([]);
+  const [drillCustomer, setDrillCustomer] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -181,16 +183,18 @@ const TrafficVertical = ({ scope, period = 30 }) => {
             {topUsers.length === 0 ? <InsightsEmpty title="No customer activity yet" /> : (
               <ul className="divide-y divide-zinc-50">
                 {topUsers.slice(0, 10).map((u, i) => (
-                  <li key={u._id || u.id || i} className="flex items-center justify-between gap-2 py-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-900">{u.email || u.name || u.customerId}</p>
-                      <p className="text-[11px] text-zinc-500">{u.lastActivity || u.lastSeen || ''}</p>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-2 text-[11px] tabular-nums">
-                      <span className="text-red-600">❤ {u.favoritesCount ?? 0}</span>
-                      <span className="text-blue-600">⚖ {u.comparesCount ?? 0}</span>
-                      <span className="text-emerald-600">↗ {u.sharesCount ?? 0}</span>
-                    </div>
+                  <li key={u._id || u.id || i}>
+                    <button type="button" onClick={() => setDrillCustomer(u)} className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-2 text-left hover:bg-zinc-50" data-testid={`insights-top-user-row-${i}`}>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-zinc-900">{u.email || u.name || u.customerId}</p>
+                        <p className="text-[11px] text-zinc-500">{u.lastActivity || u.lastSeen || ''}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2 text-[11px] tabular-nums">
+                        <span className="text-red-600">❤ {u.favoritesCount ?? 0}</span>
+                        <span className="text-blue-600">⚖ {u.comparesCount ?? 0}</span>
+                        <span className="text-emerald-600">↗ {u.sharesCount ?? 0}</span>
+                      </div>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -219,12 +223,14 @@ const TrafficVertical = ({ scope, period = 30 }) => {
             {hotLeads.length === 0 ? <InsightsEmpty title="No hot leads right now" /> : (
               <ul className="divide-y divide-zinc-50">
                 {hotLeads.slice(0, 10).map((l, i) => (
-                  <li key={l._id || l.id || i} className="flex items-center justify-between gap-2 py-2">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-zinc-900">{l.name || l.email || l.customerName || `Lead ${l._id || l.id}`}</p>
-                      <p className="text-[11px] text-zinc-500">{l.intent || l.lastActivity || l.source || ''}</p>
-                    </div>
-                    <MetricChip value={l.score != null ? `${Math.round(l.score)}` : '—'} tone={Number(l.score)>=70?'negative':Number(l.score)>=40?'warning':'positive'} />
+                  <li key={l._id || l.id || i}>
+                    <button type="button" onClick={() => setDrillCustomer(l)} className="flex w-full items-center justify-between gap-2 rounded-md px-1 py-2 text-left hover:bg-zinc-50" data-testid={`insights-hot-lead-row-${i}`}>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-zinc-900">{l.name || l.email || l.customerName || `Lead ${l._id || l.id}`}</p>
+                        <p className="text-[11px] text-zinc-500">{l.intent || l.lastActivity || l.source || ''}</p>
+                      </div>
+                      <MetricChip value={l.score != null ? `${Math.round(l.score)}` : '—'} tone={Number(l.score)>=70?'negative':Number(l.score)>=40?'warning':'positive'} />
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -232,6 +238,9 @@ const TrafficVertical = ({ scope, period = 30 }) => {
           </InsightsCard>
         </div>
       </InsightsSection>
+
+      {/* Customer drill-down sheet — opens on row click in Top Users / Hot Leads */}
+      <CustomerDrillSheet open={!!drillCustomer} onOpenChange={(o) => !o && setDrillCustomer(null)} customer={drillCustomer} />
     </motion.div>
   );
 };

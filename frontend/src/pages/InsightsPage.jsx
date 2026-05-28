@@ -68,8 +68,8 @@ const InsightsPage = () => {
 
   return (
     <div className="min-h-screen bg-zinc-50 pb-12" data-testid="insights-page">
-      {/* Page Header */}
-      <div className="sticky top-0 z-40 border-b border-zinc-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      {/* Page Header (scrolls away with content — not sticky to avoid overlapping content as user scrolls) */}
+      <div className="border-b border-zinc-200 bg-white">
         <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">

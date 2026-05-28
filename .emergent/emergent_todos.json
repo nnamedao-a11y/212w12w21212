@@ -1,50 +1,26 @@
 [
   {
-    "content": "Design guidelines for Insights hub",
+    "content": "Unsticky page header (scroll away with content)",
     "status": "completed"
   },
   {
-    "content": "Audit backend endpoints for all 5 verticals",
+    "content": "Add backend POST /api/escalations/{id}/snooze + /resolve + /reassign endpoints",
     "status": "completed"
   },
   {
-    "content": "Build /insights skeleton + KPI strip + tab nav (role-aware)",
+    "content": "Add Customer drill-down Sheet in TrafficVertical",
     "status": "completed"
   },
   {
-    "content": "Vertical 1: Traffic & Engagement",
+    "content": "Add Manager drill-down Sheet in TeamManagersVertical",
     "status": "completed"
   },
   {
-    "content": "Vertical 2: Pipeline (Leads + Deals)",
+    "content": "Filter snoozed/resolved out of /api/escalations queue",
     "status": "completed"
   },
   {
-    "content": "Vertical 3: Revenue (Payments + Contracts + Documents)",
-    "status": "completed"
-  },
-  {
-    "content": "Vertical 4: Team & Managers",
-    "status": "completed"
-  },
-  {
-    "content": "Vertical 5: Risk & Alerts (DEEP)",
-    "status": "completed"
-  },
-  {
-    "content": "Rewire sidebar (single Insights entry, drop old 8)",
-    "status": "completed"
-  },
-  {
-    "content": "All legacy URL redirects (8 + manager engagement) → Insights",
-    "status": "completed"
-  },
-  {
-    "content": "Role-aware verification (admin=COMPANY, manager=PERSONAL, Team hidden)",
-    "status": "completed"
-  },
-  {
-    "content": "End-to-end testing",
+    "content": "End-to-end verification (header scroll, drill-downs, snooze API)",
     "status": "completed"
   }
 ]

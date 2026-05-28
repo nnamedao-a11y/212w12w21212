@@ -12,6 +12,7 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { Users, Clock, Shield, Trophy } from '@phosphor-icons/react';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtPct } from '../shared/insightsApi';
+import ManagerDrillSheet from '../shared/ManagerDrillSheet';
 
 const TeamManagersVertical = ({ scope, period = 30 }) => {
   const [loading, setLoading] = useState(true);
@@ -19,6 +20,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
   const [load, setLoad] = useState([]);
   const [perf, setPerf] = useState(null);
   const [loginAudit, setLoginAudit] = useState([]);
+  const [drillManager, setDrillManager] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -59,7 +61,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
                 </tr></thead>
                 <tbody>
                   {scorecards.map((m, i) => (
-                    <tr key={m.id || i} className="border-b border-zinc-50 hover:bg-zinc-50">
+                    <tr key={m.id || i} className="border-b border-zinc-50 cursor-pointer hover:bg-zinc-50" onClick={() => setDrillManager(m)} data-testid={`insights-scorecard-row-${i}`}>
                       <td className="px-4 py-2 tabular-nums text-zinc-500">{i+1}</td>
                       <td className="px-4 py-2 font-medium text-zinc-900"><Trophy size={12} weight="duotone" className={`mr-1 inline ${i===0?'text-amber-500':i===1?'text-zinc-400':i===2?'text-amber-700':'text-transparent'}`} />{m.name || m.email}</td>
                       <td className="px-4 py-2 text-zinc-600">{m.role}</td>
@@ -93,7 +95,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
                     const total = (m.leadsCount ?? m.leads ?? 0) + (m.customersCount ?? m.customers ?? 0) + (m.dealsCount ?? m.deals ?? 0);
                     const overload = total > 50;
                     return (
-                      <tr key={m.id || i} className="border-b border-zinc-50 hover:bg-zinc-50">
+                      <tr key={m.id || i} className="border-b border-zinc-50 cursor-pointer hover:bg-zinc-50" onClick={() => setDrillManager(m)} data-testid={`insights-load-row-${i}`}>
                         <td className="px-4 py-2 font-medium text-zinc-900">{m.name || m.email}</td>
                         <td className="px-4 py-2 text-right tabular-nums">{fmtCompact(m.leadsCount ?? m.leads ?? 0)}</td>
                         <td className="px-4 py-2 text-right tabular-nums">{fmtCompact(m.customersCount ?? m.customers ?? 0)}</td>
@@ -156,6 +158,9 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
           )}
         </InsightsCard>
       </InsightsSection>
+
+      {/* Manager drill-down sheet — opens on row click in Scorecards / Load Board */}
+      <ManagerDrillSheet open={!!drillManager} onOpenChange={(o) => !o && setDrillManager(null)} manager={drillManager} />
     </motion.div>
   );
 };
