@@ -13,6 +13,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { ArrowsClockwise, StopCircle, PlayCircle, ShieldWarning, CheckCircle, ClockClockwise, WarningCircle } from '@phosphor-icons/react';
 import { API_URL } from '../../App';
+import { useLang } from '../../i18n';
 import { InsightsCard, InsightsLoading, InsightsEmpty, MetricChip } from '../../components/insights/shared/InsightsCard';
 
 const stateTone = (state) => {
@@ -79,9 +80,9 @@ const AdminWorkersPage = () => {
         <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
             <ShieldWarning size={22} weight="duotone" />
-            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl" style={{ fontFamily: 'Mazzard, Mazzard H, system-ui, sans-serif' }}>Workers Health</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl" style={{ fontFamily: 'Mazzard, Mazzard H, system-ui, sans-serif' }}>{t('ins_workers_title')}</h1>
           </div>
-          <p className="mt-0.5 text-xs text-zinc-500">Supervised background workers · live status · inline control</p>
+          <p className="mt-0.5 text-xs text-zinc-500">{t('ins_workers_subtitle')}</p>
         </div>
       </div>
 
@@ -107,13 +108,13 @@ const AdminWorkersPage = () => {
               <table className="w-full text-sm" data-testid="admin-workers-table">
                 <thead>
                   <tr className="border-b border-zinc-100 text-[11px] uppercase tracking-wider text-zinc-500">
-                    <th className="px-4 py-2 text-left font-medium">Worker</th>
-                    <th className="px-4 py-2 text-left font-medium">State</th>
-                    <th className="px-4 py-2 text-right font-medium">Restarts</th>
-                    <th className="px-4 py-2 text-left font-medium">Critical</th>
-                    <th className="px-4 py-2 text-left font-medium">Started</th>
-                    <th className="px-4 py-2 text-left font-medium">Last error</th>
-                    <th className="px-4 py-2 text-right font-medium">Actions</th>
+                    <th className="px-4 py-2 text-left font-medium">{t('ins_workers_col_name')}</th>
+                    <th className="px-4 py-2 text-left font-medium">{t('ins_workers_col_state')}</th>
+                    <th className="px-4 py-2 text-right font-medium">{t('ins_workers_col_restarts')}</th>
+                    <th className="px-4 py-2 text-left font-medium">{t('ins_workers_col_critical')}</th>
+                    <th className="px-4 py-2 text-left font-medium">{t('ins_workers_col_started')}</th>
+                    <th className="px-4 py-2 text-left font-medium">{t('ins_workers_col_error')}</th>
+                    <th className="px-4 py-2 text-right font-medium">{t('ins_workers_col_actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -143,7 +144,7 @@ const AdminWorkersPage = () => {
                               className="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                               data-testid={`admin-workers-restart-${w.name}`}
                             >
-                              <ArrowsClockwise size={11} weight="bold" />{busy[w.name] === 'restart' ? '…' : 'Restart'}
+                              <ArrowsClockwise size={11} weight="bold" />{busy[w.name] === 'restart' ? '…' : t('ins_workers_btn_restart')}
                             </button>
                             {w.state === 'running' || w.state === 'starting' ? (
                               <button
@@ -153,7 +154,7 @@ const AdminWorkersPage = () => {
                                 className="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                                 data-testid={`admin-workers-stop-${w.name}`}
                               >
-                                <StopCircle size={11} weight="bold" />{busy[w.name] === 'stop' ? '…' : 'Stop'}
+                                <StopCircle size={11} weight="bold" />{busy[w.name] === 'stop' ? '…' : t('ins_workers_btn_stop')}
                               </button>
                             ) : (
                               <button
@@ -163,7 +164,7 @@ const AdminWorkersPage = () => {
                                 className="inline-flex items-center gap-1 rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                                 data-testid={`admin-workers-start-${w.name}`}
                               >
-                                <PlayCircle size={11} weight="bold" />{busy[w.name] === 'start' ? '…' : 'Start'}
+                                <PlayCircle size={11} weight="bold" />{busy[w.name] === 'start' ? '…' : t('ins_workers_btn_start')}
                               </button>
                             )}
                           </div>
@@ -177,7 +178,7 @@ const AdminWorkersPage = () => {
           )}
         </InsightsCard>
 
-        <p className="text-[11px] text-zinc-500">Auto-refreshes every 10s. Restart resets the restart counter · Stop performs a graceful cancel · Start launches a stopped/crashed worker.</p>
+        <p className="text-[11px] text-zinc-500">{t('ins_workers_autorefresh')}</p>
       </div>
     </div>
   );

@@ -13,8 +13,10 @@ import { Users, Clock, Shield, Trophy } from '@phosphor-icons/react';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtPct } from '../shared/insightsApi';
 import ManagerDrillSheet from '../shared/ManagerDrillSheet';
+import { useLang } from '../../../i18n';
 
 const TeamManagersVertical = ({ scope, period = 30 }) => {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [scorecards, setScorecards] = useState([]);
   const [load, setLoad] = useState([]);
@@ -46,7 +48,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="space-y-6">
-      <InsightsSection id="manager-scorecards" title="Manager Scorecards" subtitle="Ranking by conversion rate">
+      <InsightsSection id="manager-scorecards" title={t('ins_sec_scorecards')} subtitle={t('ins_sec_scorecards_sub')} tip={t('ins_tip_scorecards')}>
         <InsightsCard testId="insights-manager-scorecards-table" padded={false}>
           {scorecards.length === 0 ? <div className="p-5"><InsightsEmpty title="No managers data" /></div> : (
             <div className="max-h-[420px] overflow-auto">
@@ -77,7 +79,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
         </InsightsCard>
       </InsightsSection>
 
-      <InsightsSection id="load-board" title="Manager Load Board" subtitle="Active workload per manager">
+      <InsightsSection id="load-board" title={t('ins_sec_load_board')} subtitle={t('ins_sec_load_board_sub')} tip={t('ins_tip_load_board')}>
         <InsightsCard testId="insights-manager-load-board" padded={false}>
           {load.length === 0 ? <div className="p-5"><InsightsEmpty title="No managers" /></div> : (
             <div className="max-h-[420px] overflow-auto">
@@ -112,7 +114,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
         </InsightsCard>
       </InsightsSection>
 
-      <InsightsSection id="sla-response" title="SLA / Response Time" subtitle="Per-manager response performance">
+      <InsightsSection id="sla-response" title={t('ins_sec_sla_response')} subtitle={t('ins_sec_sla_response_sub')} tip={t('ins_tip_sla_response')}>
         <InsightsCard testId="insights-sla-response-card">
           {!perf?.responseTime || (Array.isArray(perf?.responseTime) && perf.responseTime.length === 0) ? <InsightsEmpty title="No response time data" /> : (
             <div className="h-64">
@@ -130,7 +132,7 @@ const TeamManagersVertical = ({ scope, period = 30 }) => {
         </InsightsCard>
       </InsightsSection>
 
-      <InsightsSection id="login-audit" title="Login Activity Audit" subtitle="Recent sessions · anomaly detection">
+      <InsightsSection id="login-audit" title={t('ins_sec_login_audit')} subtitle={t('ins_sec_login_audit_sub')} tip={t('ins_tip_login_audit')}>
         <InsightsCard testId="insights-login-audit-table" padded={false}>
           {loginAudit.length === 0 ? <div className="p-5"><InsightsEmpty title="No login events yet" /></div> : (
             <div className="max-h-[360px] overflow-auto">

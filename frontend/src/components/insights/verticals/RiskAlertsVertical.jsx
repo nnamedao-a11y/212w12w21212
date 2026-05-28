@@ -20,10 +20,12 @@ import { safeGet, fmtCompact, fmtMoney, riskBandClass } from '../shared/insights
 import ReassignPopover from '../shared/ReassignPopover';
 import ManagerDrillSheet from '../shared/ManagerDrillSheet';
 import AlertDrillSheet from '../shared/AlertDrillSheet';
+import { useLang } from '../../../i18n';
 
 const SEVERITIES = ['critical', 'high', 'medium', 'low'];
 
 function RiskOverviewSection({ data }) {
+  const { t } = useLang();
   const score = data?.score ?? 0;
   const band = riskBandClass(score);
   const radialData = [{ name: 'Risk', value: score, fill: score >= 70 ? '#dc2626' : score >= 40 ? '#d97706' : '#10b981' }];
@@ -31,7 +33,7 @@ function RiskOverviewSection({ data }) {
   const series = data?.timeseries || [];
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-      <InsightsCard className="lg:col-span-7" title={<span className="flex items-center gap-2 text-sm font-medium"><Shield size={14} weight="duotone" /> Composite Risk Score</span>} testId="insights-risk-overview-card">
+      <InsightsCard className="lg:col-span-7" title={<span className="flex items-center gap-2 text-sm font-medium"><Shield size={14} weight="duotone" /> {t('ins_card_composite_score')}</span>} tip={t('ins_tip_risk_overview')} testId="insights-risk-overview-card">
         <div className="grid grid-cols-1 items-center gap-4 sm:grid-cols-2">
           <div className="relative h-48">
             <ResponsiveContainer width="100%" height="100%">
@@ -41,11 +43,11 @@ function RiskOverviewSection({ data }) {
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
               <span className={`text-3xl font-semibold tabular-nums ${band.text}`} data-testid="insights-risk-composite-score">{score}</span>
-              <span className="text-[11px] uppercase tracking-wider text-zinc-500">{score < 40 ? 'Healthy' : score < 70 ? 'Watch' : 'Critical'}</span>
+              <span className="text-[11px] uppercase tracking-wider text-zinc-500">{score < 40 ? t('ins_band_healthy') : score < 70 ? t('ins_band_watch') : t('ins_band_critical')}</span>
             </div>
           </div>
           <div className="h-48" data-testid="insights-risk-timeseries-chart">
-            <p className="mb-1 text-[11px] uppercase tracking-wider text-zinc-500">Risk score · last 14 days</p>
+            <p className="mb-1 text-[11px] uppercase tracking-wider text-zinc-500">{t('ins_chart_risk_14d')}</p>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={series} margin={{ top: 4, right: 8, left: -16, bottom: 4 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
@@ -81,12 +83,14 @@ function RiskOverviewSection({ data }) {
 }
 
 function RiskByEntitySection({ entities, onOpenManager }) {
+  const { t } = useLang();
   const [tab, setTab] = useState('manager');
   const rows = entities[tab] || [];
+  const entityLabels = { manager: t('ins_risk_entity_manager'), team: t('ins_risk_entity_team'), deal: t('ins_risk_entity_deal') };
   return (
-    <InsightsCard title={<div className="flex items-center gap-3"><span className="text-sm font-medium">Risk by</span><div className="flex rounded-lg bg-zinc-100 p-0.5">{['manager','team','deal'].map(k => (
+    <InsightsCard title={<div className="flex items-center gap-3"><span className="text-sm font-medium">{t('ins_sec_risk_by_entity')}</span><div className="flex rounded-lg bg-zinc-100 p-0.5">{['manager','team','deal'].map(k => (
       <button key={k} type="button" onClick={() => setTab(k)} data-testid={`insights-risk-entity-tab-${k}`}
-        className={`px-3 py-1 text-xs font-medium capitalize ${tab===k?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>{k}</button>
+        className={`px-3 py-1 text-xs font-medium ${tab===k?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>{entityLabels[k]}</button>
     ))}</div></div>} testId="insights-risk-by-entity-card">
       {rows.length === 0 ? (
         <InsightsEmpty title={`No ${tab} risk data`} />
@@ -173,6 +177,7 @@ function CriticalAlertsFeed({ alerts, onOpen, severity, setSeverity, onRefresh }
 }
 
 function EscalationQueue({ escalations, onOpen, onAction, onBulkAction }) {
+  const { t } = useLang();
   const [selected, setSelected] = useState(new Set());
   const [bulkReassignOpen, setBulkReassignOpen] = useState(false);
   const [bulkReassignOwner, setBulkReassignOwner] = useState('');
@@ -201,23 +206,23 @@ function EscalationQueue({ escalations, onOpen, onAction, onBulkAction }) {
   };
 
   return (
-    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Warning size={14} weight="duotone" /> Escalation Queue</span>} padded={false} testId="insights-escalation-queue-card"
+    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Warning size={14} weight="duotone" /> {t('ins_sec_escalation_queue')}</span>} padded={false} testId="insights-escalation-queue-card"
       actions={hasSelection ? (
         <div className="flex items-center gap-1.5" data-testid="insights-escalation-bulk-actions">
-          <span className="text-[11px] font-medium text-zinc-700">{selectedItems.length} selected</span>
+          <span className="text-[11px] font-medium text-zinc-700">{selectedItems.length} {t('ins_selected')}</span>
           <button onClick={() => handleBulk('resolve')} className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-emerald-700" data-testid="insights-escalation-bulk-resolve">
-            <CheckCircle size={11} weight="bold" /> Bulk Resolve
+            <CheckCircle size={11} weight="bold" /> {t('ins_bulk_resolve')}
           </button>
           <button onClick={() => handleBulk('snooze')} className="inline-flex items-center gap-1 rounded-md bg-sky-600 px-2 py-1 text-[11px] font-medium text-white hover:bg-sky-700" data-testid="insights-escalation-bulk-snooze">
-            <Snowflake size={11} weight="bold" /> Bulk Snooze
+            <Snowflake size={11} weight="bold" /> {t('ins_bulk_snooze')}
           </button>
           <span className="relative">
             <button onClick={() => setBulkReassignOpen(v => !v)} className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white hover:bg-zinc-800" data-testid="insights-escalation-bulk-reassign-trigger">
-              <ArrowsClockwise size={11} weight="bold" /> Bulk Reassign
+              <ArrowsClockwise size={11} weight="bold" /> {t('ins_bulk_reassign')}
             </button>
             {bulkReassignOpen && (
               <span className="absolute right-0 top-full z-50 mt-1 inline-flex w-64 flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-lg" data-testid="insights-escalation-bulk-reassign-panel">
-                <span className="text-xs font-medium text-zinc-900">Reassign {selectedItems.length} to</span>
+                <span className="text-xs font-medium text-zinc-900">{t('ins_reassign_to')} {selectedItems.length}</span>
                 <input
                   value={bulkReassignOwner}
                   onChange={(e) => setBulkReassignOwner(e.target.value)}
@@ -227,19 +232,19 @@ function EscalationQueue({ escalations, onOpen, onAction, onBulkAction }) {
                   autoFocus
                 />
                 <span className="flex justify-end gap-1">
-                  <button type="button" onClick={() => { setBulkReassignOpen(false); setBulkReassignOwner(''); }} className="rounded-md px-2 py-1 text-[11px] font-medium text-zinc-600 hover:bg-zinc-100">Cancel</button>
+                  <button type="button" onClick={() => { setBulkReassignOpen(false); setBulkReassignOwner(''); }} className="rounded-md px-2 py-1 text-[11px] font-medium text-zinc-600 hover:bg-zinc-100">{t('ins_cancel')}</button>
                   <button
                     type="button"
                     disabled={!bulkReassignOwner.trim()}
                     onClick={async () => { await handleBulk('reassign', { owner: bulkReassignOwner.trim() }); setBulkReassignOpen(false); setBulkReassignOwner(''); }}
                     className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white disabled:opacity-50"
                     data-testid="insights-escalation-bulk-reassign-confirm"
-                  ><CheckCircle size={11} weight="bold" /> Confirm</button>
+                  ><CheckCircle size={11} weight="bold" /> {t('ins_confirm')}</button>
                 </span>
               </span>
             )}
           </span>
-          <button onClick={() => setSelected(new Set())} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] text-zinc-600 hover:bg-zinc-50">Clear</button>
+          <button onClick={() => setSelected(new Set())} className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] text-zinc-600 hover:bg-zinc-50">{t('ins_clear')}</button>
         </div>
       ) : null}
     >
@@ -299,13 +304,14 @@ function EscalationQueue({ escalations, onOpen, onAction, onBulkAction }) {
 }
 
 function StuckItems({ items }) {
+  const { t } = useLang();
   const [seg, setSeg] = useState('all');
   const list = useMemo(() => {
     if (seg === 'all') return items;
     return items.filter(i => i.kind === seg);
   }, [items, seg]);
   return (
-    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Clock size={14} weight="duotone" /> Unified Stuck Items</span>}
+    <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Clock size={14} weight="duotone" /> {t('ins_sec_stuck_items')}</span>}
       actions={
         <div className="flex rounded-lg bg-zinc-100 p-0.5" data-testid="insights-stuck-items-segmented">
           {[{k:'all',l:'All'},{k:'lead',l:'Stale Leads'},{k:'invoice',l:'Overdue Invoices'},{k:'shipment',l:'Stalled Shipments'}].map(s => (
@@ -349,6 +355,7 @@ function StuckItems({ items }) {
 }
 
 const RiskAlertsVertical = ({ scope }) => {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState({ score: 0, drivers: [], timeseries: [] });
   const [entities, setEntities] = useState({ manager: [], team: [], deal: [] });
@@ -522,19 +529,19 @@ const RiskAlertsVertical = ({ scope }) => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="space-y-6">
-      <InsightsSection id="risk-overview" title="Risk Overview" subtitle="Composite score · drivers · 14-day trend">
+      <InsightsSection id="risk-overview" title={t('ins_sec_risk_overview')} subtitle={t('ins_sec_risk_overview_sub')} tip={t('ins_tip_risk_overview')}>
         <RiskOverviewSection data={overview} />
       </InsightsSection>
-      <InsightsSection id="risk-by-entity" title="Risk by Manager / Team / Deal" subtitle="Drill into ranking by entity">
+      <InsightsSection id="risk-by-entity" title={t('ins_sec_risk_by_entity')} subtitle={t('ins_sec_risk_by_entity_sub')} tip={t('ins_tip_risk_by_entity')}>
         <RiskByEntitySection entities={entities} onOpenManager={setDrillManager} />
       </InsightsSection>
-      <InsightsSection id="critical-alerts-feed" title="Critical Alerts · Live Feed" subtitle="Filter by severity · click cell for timeline">
+      <InsightsSection id="critical-alerts-feed" title={t('ins_sec_alerts_feed')} subtitle={t('ins_sec_alerts_feed_sub')} tip={t('ins_tip_alerts_feed')}>
         <CriticalAlertsFeed alerts={alerts} onOpen={setDrillAlert} severity={severity} setSeverity={setSeverity} onRefresh={() => setRefreshTick(t => t+1)} />
       </InsightsSection>
-      <InsightsSection id="escalation-queue" title="Escalation Queue" subtitle="Resolve · Snooze · Reassign in line">
+      <InsightsSection id="escalation-queue" title={t('ins_sec_escalation_queue')} subtitle={t('ins_sec_escalation_queue_sub')} tip={t('ins_tip_escalation_queue')}>
         <EscalationQueue escalations={escalations} onOpen={setOpenItem} onAction={handleAction} onBulkAction={handleBulkAction} />
       </InsightsSection>
-      <InsightsSection id="stuck-items" title="Unified Stuck Items" subtitle="Stale leads · Overdue invoices · Stalled shipments — one boil">
+      <InsightsSection id="stuck-items" title={t('ins_sec_stuck_items')} subtitle={t('ins_sec_stuck_items_sub')} tip={t('ins_tip_stuck_items')}>
         <StuckItems items={stuck} />
       </InsightsSection>
 

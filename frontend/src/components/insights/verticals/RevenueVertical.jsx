@@ -15,8 +15,10 @@ import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricCh
 import { safeGet, fmtMoney, fmtCompact } from '../shared/insightsApi';
 import { API_URL } from '../../../App';
 import ContractDrillSheet from '../shared/ContractDrillSheet';
+import { useLang } from '../../../i18n';
 
 const RevenueVertical = ({ scope, period = 30 }) => {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [owner, setOwner] = useState(null);
   const [contracts, setContracts] = useState([]);
@@ -71,9 +73,9 @@ const RevenueVertical = ({ scope, period = 30 }) => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="space-y-6">
-      <InsightsSection id="revenue-trend" title="Revenue Trend" subtitle={`Last ${period} days · ${fmtMoney(owner?.totalRevenue || owner?.revenue || 0)} total`}>
+      <InsightsSection id="revenue-trend" title={t('ins_sec_revenue_trend')} subtitle={`${t('ins_period_' + (period === 7 ? '7d' : period === 90 ? '90d' : '30d'))} · ${fmtMoney(owner?.totalRevenue || owner?.revenue || 0)}`} tip={t('ins_tip_revenue_trend')}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <InsightsCard className="lg:col-span-8" title="Revenue · daily" testId="insights-revenue-trend-card">
+          <InsightsCard className="lg:col-span-8" title={t('ins_sec_revenue_trend')} testId="insights-revenue-trend-card">
             {trend.length === 0 ? <InsightsEmpty title="No revenue data" /> : (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -88,7 +90,7 @@ const RevenueVertical = ({ scope, period = 30 }) => {
               </div>
             )}
           </InsightsCard>
-          <InsightsCard className="lg:col-span-4" title="By Manager">
+          <InsightsCard className="lg:col-span-4" title={t('ins_card_by_manager')}>
             {breakdown.length === 0 ? <InsightsEmpty title="—" /> : (
               <ul className="space-y-2">
                 {breakdown.slice(0, 8).map((b, i) => (
@@ -103,7 +105,7 @@ const RevenueVertical = ({ scope, period = 30 }) => {
         </div>
       </InsightsSection>
 
-      <InsightsSection id="ar-ageing" title="AR Ageing" subtitle="Receivables by age bucket · click bucket to filter">
+      <InsightsSection id="ar-ageing" title={t('ins_sec_ar_ageing')} subtitle={t('ins_sec_ar_ageing_sub')} tip={t('ins_tip_ar_ageing')}>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {['0-30','30-60','60-90','90+'].map((k) => {
             const arr = buckets[k];
@@ -123,8 +125,8 @@ const RevenueVertical = ({ scope, period = 30 }) => {
         </div>
       </InsightsSection>
 
-      <InsightsSection id="contracts-ledger" title="Contracts Ledger" subtitle={`${visibleContracts.length} contracts · ${bucketFilter==='all' ? 'all' : bucketFilter + ' days'}`}
-        actions={<button onClick={exportContracts} data-testid="insights-contracts-export-button" className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"><Download size={12} weight="bold" /> Export CSV</button>}>
+      <InsightsSection id="contracts-ledger" title={t('ins_sec_contracts_ledger')} subtitle={`${visibleContracts.length} · ${bucketFilter==='all' ? '' : bucketFilter + ' days'}`} tip={t('ins_tip_contracts_ledger')}
+        actions={<button onClick={exportContracts} data-testid="insights-contracts-export-button" className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"><Download size={12} weight="bold" /> {t('ins_btn_export_csv')}</button>}>
         <InsightsCard padded={false} testId="insights-contracts-ledger-table">
           {visibleContracts.length === 0 ? <div className="p-5"><InsightsEmpty title="No contracts match filter" /></div> : (
             <div className="max-h-[480px] overflow-auto">
@@ -179,7 +181,7 @@ const RevenueVertical = ({ scope, period = 30 }) => {
               </div>
             )}
           </InsightsCard>
-          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Receipt size={14} weight="duotone" /> Verification Queue ({pending.length})</span>} testId="insights-documents-verification-queue" padded={false}>
+          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Receipt size={14} weight="duotone" /> {t('ins_card_documents_verification')} ({pending.length})</span>} tip={t('ins_tip_documents_verification')} testId="insights-documents-verification-queue" padded={false}>
             {pending.length === 0 ? <div className="p-5"><InsightsEmpty title="Verification queue clear" /></div> : (
               <ul className="divide-y divide-zinc-100 max-h-[320px] overflow-auto">
                 {pending.slice(0, 50).map((p, i) => (

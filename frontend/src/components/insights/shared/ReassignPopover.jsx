@@ -15,8 +15,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowsClockwise, X, CheckCircle } from '@phosphor-icons/react';
 import { safeGet } from './insightsApi';
+import { useLang } from '../../../i18n';
 
 const ReassignPopover = ({ trigger, currentOwner, onSubmit, testId = 'reassign-popover' }) => {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   const [owner, setOwner] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -69,7 +71,7 @@ const ReassignPopover = ({ trigger, currentOwner, onSubmit, testId = 'reassign-p
           className="rounded-md border border-zinc-200 px-2 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50"
           data-testid={`${testId}-trigger`}
         >
-          <ArrowsClockwise size={11} className="mr-0.5 inline" />Reassign
+          <ArrowsClockwise size={11} className="mr-0.5 inline" />{t('ins_reassign')}
         </button>
       )}
 
@@ -80,11 +82,11 @@ const ReassignPopover = ({ trigger, currentOwner, onSubmit, testId = 'reassign-p
           data-testid={`${testId}-panel`}
         >
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-zinc-900">Reassign to</span>
+            <span className="text-xs font-medium text-zinc-900">{t('ins_reassign_to')}</span>
             <button type="button" onClick={() => setOpen(false)} className="text-zinc-400 hover:text-zinc-700"><X size={12} weight="bold" /></button>
           </div>
           {currentOwner && (
-            <div className="mb-2 text-[11px] text-zinc-500">Current: <span className="font-medium text-zinc-700">{currentOwner}</span></div>
+            <div className="mb-2 text-[11px] text-zinc-500">{t('ins_current_owner')} <span className="font-medium text-zinc-700">{currentOwner}</span></div>
           )}
           <form onSubmit={handleConfirm} className="space-y-2">
             <input

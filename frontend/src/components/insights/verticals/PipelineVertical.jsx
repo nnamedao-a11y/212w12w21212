@@ -10,8 +10,10 @@ import { TrendUp, UsersThree, Clock, Target } from '@phosphor-icons/react';
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtDuration, fmtPct } from '../shared/insightsApi';
 import DealDrillSheet from '../shared/DealDrillSheet';
+import { useLang } from '../../../i18n';
 
 function LeadsTab({ scope, period }) {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [kpi, setKpi] = useState({});
   const [stale, setStale] = useState([]);
@@ -52,7 +54,7 @@ function LeadsTab({ scope, period }) {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <InsightsCard className="lg:col-span-7" title="Leads Funnel" testId="insights-leads-funnel-card">
+        <InsightsCard className="lg:col-span-7" title={t('ins_sec_leads_funnel')} tip={t('ins_tip_leads_funnel')} testId="insights-leads-funnel-card">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <FunnelChart>
@@ -65,17 +67,17 @@ function LeadsTab({ scope, period }) {
             </ResponsiveContainer>
           </div>
         </InsightsCard>
-        <InsightsCard className="lg:col-span-5" title="Funnel Health">
+        <InsightsCard className="lg:col-span-5" title={t('ins_card_funnel_health')}>
           <ul className="space-y-3">
-            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">Contact Rate</span><MetricChip value={fmtPct(contactRate)} tone={contactRate>=60?'positive':contactRate>=30?'warning':'negative'} /></li>
-            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">Conversion Rate</span><MetricChip value={fmtPct(convRate)} tone={convRate>=20?'positive':convRate>=10?'warning':'negative'} /></li>
-            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">Avg First Response</span><MetricChip value={kpi.avgResponseTime ? `${kpi.avgResponseTime}m` : '—'} tone={kpi.avgResponseTime<=10?'positive':kpi.avgResponseTime<=60?'warning':'negative'} /></li>
-            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">Leads Trend (vs prev)</span><MetricChip value={kpi.trends?.leads != null ? `${kpi.trends.leads>0?'+':''}${kpi.trends.leads}%` : '—'} tone={kpi.trends?.leads>0?'positive':kpi.trends?.leads<0?'negative':'neutral'} /></li>
+            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">{t('ins_metric_contact_rate')}</span><MetricChip value={fmtPct(contactRate)} tone={contactRate>=60?'positive':contactRate>=30?'warning':'negative'} /></li>
+            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">{t('ins_metric_conversion_rate')}</span><MetricChip value={fmtPct(convRate)} tone={convRate>=20?'positive':convRate>=10?'warning':'negative'} /></li>
+            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">{t('ins_metric_avg_first_response')}</span><MetricChip value={kpi.avgResponseTime ? `${kpi.avgResponseTime}m` : '—'} tone={kpi.avgResponseTime<=10?'positive':kpi.avgResponseTime<=60?'warning':'negative'} /></li>
+            <li className="flex items-center justify-between rounded-lg border border-zinc-100 px-3 py-2"><span className="text-sm text-zinc-700">{t('ins_metric_leads_trend')}</span><MetricChip value={kpi.trends?.leads != null ? `${kpi.trends.leads>0?'+':''}${kpi.trends.leads}%` : '—'} tone={kpi.trends?.leads>0?'positive':kpi.trends?.leads<0?'negative':'neutral'} /></li>
           </ul>
         </InsightsCard>
       </div>
 
-      <InsightsCard title="Stale Leads · Need Action" testId="insights-stale-leads-table" padded={false}>
+      <InsightsCard title={t('ins_sec_stale_leads')} tip={t('ins_tip_stale_leads')} testId="insights-stale-leads-table" padded={false}>
         {stale.length === 0 ? <div className="p-5"><InsightsEmpty title="No stale leads — great work." /></div> : (
           <div className="max-h-[420px] overflow-auto">
             <table className="w-full text-sm">
@@ -102,7 +104,7 @@ function LeadsTab({ scope, period }) {
         )}
       </InsightsCard>
 
-      <InsightsCard title="Conversion per Manager" testId="insights-conversion-per-manager-card">
+      <InsightsCard title={t('ins_sec_conversion_per_manager')} tip={t('ins_tip_conversion_per_manager')} testId="insights-conversion-per-manager-card">
         {leaderboard.length === 0 ? <InsightsEmpty title="No managers data" /> : (
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -151,7 +153,7 @@ function DealsTab({ scope, period }) {
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <InsightsCard className="lg:col-span-8" title="Deals Journey Funnel" testId="insights-deals-journey-funnel-card">
+        <InsightsCard className="lg:col-span-8" title={t('ins_sec_deals_funnel')} tip={t('ins_tip_deals_funnel')} testId="insights-deals-journey-funnel-card">
           {funnel.length === 0 ? <InsightsEmpty title="No journey data" /> : (
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
@@ -166,7 +168,7 @@ function DealsTab({ scope, period }) {
             </div>
           )}
         </InsightsCard>
-        <InsightsCard className="lg:col-span-4" title="Bottlenecks">
+        <InsightsCard className="lg:col-span-4" title={t('ins_card_bottlenecks')} tip={t('ins_tip_bottlenecks')}>
           {bottle.length === 0 ? <InsightsEmpty title="No bottlenecks" /> : (
             <ul className="space-y-2">
               {bottle.slice(0, 6).map((b, i) => (
@@ -187,7 +189,7 @@ function DealsTab({ scope, period }) {
         </InsightsCard>
       </div>
 
-      <InsightsCard title="Cycle Time per Stage" testId="insights-cycle-time-card" padded={false}>
+      <InsightsCard title={t('ins_sec_cycle_time')} tip={t('ins_tip_cycle_time')} testId="insights-cycle-time-card" padded={false}>
         {durations.length === 0 ? <div className="p-5"><InsightsEmpty title="No duration data" /></div> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -219,15 +221,16 @@ function DealsTab({ scope, period }) {
 }
 
 const PipelineVertical = ({ scope, period = 30 }) => {
+  const { t } = useLang();
   const [sub, setSub] = useState('leads');
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="space-y-4">
       <div className="inline-flex rounded-lg bg-zinc-100 p-0.5" data-testid="insights-pipeline-subtabs">
         <button onClick={() => setSub('leads')} data-testid="insights-pipeline-tab-leads" className={`px-4 py-1.5 text-sm font-medium ${sub==='leads'?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>
-          <UsersThree size={14} className="mr-1 inline" weight="duotone" /> Leads
+          <UsersThree size={14} className="mr-1 inline" weight="duotone" /> {t('ins_pipeline_subtab_leads')}
         </button>
         <button onClick={() => setSub('deals')} data-testid="insights-pipeline-tab-deals" className={`px-4 py-1.5 text-sm font-medium ${sub==='deals'?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>
-          <Target size={14} className="mr-1 inline" weight="duotone" /> Deals
+          <Target size={14} className="mr-1 inline" weight="duotone" /> {t('ins_pipeline_subtab_deals')}
         </button>
       </div>
       {sub === 'leads' ? <LeadsTab scope={scope} period={period} /> : <DealsTab scope={scope} period={period} />}

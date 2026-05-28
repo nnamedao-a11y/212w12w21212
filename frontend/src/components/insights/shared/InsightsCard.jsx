@@ -9,8 +9,9 @@
  */
 import React from 'react';
 import { ArrowClockwise, Warning } from '@phosphor-icons/react';
+import InsightsHelpTooltip from './InsightsHelpTooltip';
 
-export const InsightsCard = ({ title, actions, children, className = '', testId, padded = true }) => {
+export const InsightsCard = ({ title, tip, actions, children, className = '', testId, padded = true }) => {
   return (
     <div
       className={`rounded-2xl border border-zinc-200 bg-white shadow-sm transition-[box-shadow,border-color] duration-150 hover:border-zinc-300 hover:shadow-md ${className}`}
@@ -19,10 +20,16 @@ export const InsightsCard = ({ title, actions, children, className = '', testId,
       {(title || actions) && (
         <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3 sm:px-5">
           <div className="min-w-0">
-            {typeof title === 'string' ? (
-              <h3 className="truncate text-sm font-medium text-zinc-900">{title}</h3>
+            {tip ? (
+              <InsightsHelpTooltip text={tip}>
+                {typeof title === 'string' ? (
+                  <h3 className="truncate text-sm font-medium text-zinc-900">{title}</h3>
+                ) : title}
+              </InsightsHelpTooltip>
             ) : (
-              title
+              typeof title === 'string' ? (
+                <h3 className="truncate text-sm font-medium text-zinc-900">{title}</h3>
+              ) : title
             )}
           </div>
           {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
@@ -33,11 +40,17 @@ export const InsightsCard = ({ title, actions, children, className = '', testId,
   );
 };
 
-export const InsightsSection = ({ id, title, subtitle, actions, children, className = '' }) => (
+export const InsightsSection = ({ id, title, subtitle, tip, actions, children, className = '' }) => (
   <section id={id} className={`scroll-mt-32 ${className}`} data-testid={`insights-section-${id}`}>
     <div className="mb-3 flex items-end justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="truncate text-base font-semibold text-zinc-900 sm:text-lg">{title}</h2>
+        {tip ? (
+          <InsightsHelpTooltip text={tip}>
+            <h2 className="truncate text-base font-semibold text-zinc-900 sm:text-lg">{title}</h2>
+          </InsightsHelpTooltip>
+        ) : (
+          <h2 className="truncate text-base font-semibold text-zinc-900 sm:text-lg">{title}</h2>
+        )}
         {subtitle && <p className="mt-0.5 text-xs text-zinc-500">{subtitle}</p>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

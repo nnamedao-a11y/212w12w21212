@@ -12,24 +12,27 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChartBar, ChartLineUp, CurrencyDollar, UsersThree, ShieldCheck, ChartPie } from '@phosphor-icons/react';
 import { useAuth } from '../App';
+import { useLang } from '../i18n';
 import OverviewKpiStrip from '../components/insights/OverviewKpiStrip';
 import RiskAlertsVertical from '../components/insights/verticals/RiskAlertsVertical';
 import TrafficVertical from '../components/insights/verticals/TrafficVertical';
 import PipelineVertical from '../components/insights/verticals/PipelineVertical';
 import RevenueVertical from '../components/insights/verticals/RevenueVertical';
 import TeamManagersVertical from '../components/insights/verticals/TeamManagersVertical';
+import InsightsHelpTooltip from '../components/insights/shared/InsightsHelpTooltip';
 import { scopeForRole, tabsForRole } from '../components/insights/shared/insightsApi';
 
 const TAB_META = {
-  traffic:  { label: 'Traffic & Engagement', icon: ChartBar,     testId: 'insights-tab-traffic' },
-  pipeline: { label: 'Pipeline',             icon: ChartLineUp,  testId: 'insights-tab-pipeline' },
-  revenue:  { label: 'Revenue',              icon: CurrencyDollar, testId: 'insights-tab-revenue' },
-  team:     { label: 'Team & Managers',      icon: UsersThree,   testId: 'insights-tab-team' },
-  risk:     { label: 'Risk & Alerts',        icon: ShieldCheck,  testId: 'insights-tab-risk' },
+  traffic:  { labelKey: 'ins_tab_traffic',  tipKey: 'ins_tip_tab_traffic',  icon: ChartBar,       testId: 'insights-tab-traffic' },
+  pipeline: { labelKey: 'ins_tab_pipeline', tipKey: 'ins_tip_tab_pipeline', icon: ChartLineUp,    testId: 'insights-tab-pipeline' },
+  revenue:  { labelKey: 'ins_tab_revenue',  tipKey: 'ins_tip_tab_revenue',  icon: CurrencyDollar, testId: 'insights-tab-revenue' },
+  team:     { labelKey: 'ins_tab_team',     tipKey: 'ins_tip_tab_team',     icon: UsersThree,     testId: 'insights-tab-team' },
+  risk:     { labelKey: 'ins_tab_risk',     tipKey: 'ins_tip_tab_risk',     icon: ShieldCheck,    testId: 'insights-tab-risk' },
 };
 
 const InsightsPage = () => {
   const { user } = useAuth();
+  const { t } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,9 +64,9 @@ const InsightsPage = () => {
   };
 
   const scopeBadge = {
-    company: { label: 'Company', explainer: 'Showing company-wide performance.' },
-    team:    { label: 'Your team', explainer: 'Showing your team’s performance.' },
-    personal:{ label: 'Personal', explainer: 'Showing your personal performance.' },
+    company:  { label: t('ins_scope_company'),  explainer: t('ins_subtitle_company') },
+    team:     { label: t('ins_scope_team'),     explainer: t('ins_subtitle_team') },
+    personal: { label: t('ins_scope_personal'), explainer: t('ins_subtitle_personal') },
   }[scope];
 
   return (
@@ -75,15 +78,19 @@ const InsightsPage = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <ChartPie size={22} weight="duotone" className="text-zinc-900" />
-                <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl" style={{ fontFamily: 'Mazzard, Mazzard H, system-ui, sans-serif' }}>Insights</h1>
+                <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl" style={{ fontFamily: 'Mazzard, Mazzard H, system-ui, sans-serif' }}>{t('ins_title')}</h1>
                 <span data-testid="insights-scope-badge" className="ml-1 inline-flex items-center rounded-md border border-zinc-200 bg-white px-2 py-0.5 text-[11px] font-medium uppercase tracking-wider text-zinc-600">{scopeBadge.label}</span>
               </div>
               <p className="mt-0.5 text-xs text-zinc-500">{scopeBadge.explainer}</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="inline-flex rounded-lg bg-zinc-100 p-0.5" data-testid="insights-period-selector">
-                {[7, 30, 90].map(p => (
-                  <button key={p} onClick={() => setPeriod(p)} className={`px-3 py-1.5 text-xs font-medium ${period===p?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>{p}d</button>
+                {[
+                  { d: 7,  k: 'ins_period_7d' },
+                  { d: 30, k: 'ins_period_30d' },
+                  { d: 90, k: 'ins_period_90d' },
+                ].map(({ d, k }) => (
+                  <button key={d} onClick={() => setPeriod(d)} className={`px-3 py-1.5 text-xs font-medium ${period===d?'rounded-md bg-white text-zinc-900 shadow-sm':'text-zinc-600'}`}>{t(k)}</button>
                 ))}
               </div>
             </div>
@@ -103,11 +110,13 @@ const InsightsPage = () => {
               const Icon = meta.icon;
               const active = tab === k;
               return (
-                <button key={k} onClick={() => setTab(k)} data-testid={meta.testId}
-                  className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${active ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-700 hover:bg-zinc-100'}`}>
-                  <Icon size={15} weight="duotone" />
-                  <span>{meta.label}</span>
-                </button>
+                <InsightsHelpTooltip key={k} text={t(meta.tipKey)} side="bottom" align="center" delay={250}>
+                  <button onClick={() => setTab(k)} data-testid={meta.testId}
+                    className={`flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150 ${active ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-700 hover:bg-zinc-100'}`}>
+                    <Icon size={15} weight="duotone" />
+                    <span>{t(meta.labelKey)}</span>
+                  </button>
+                </InsightsHelpTooltip>
               );
             })}
           </div>

@@ -15,8 +15,10 @@ import { Heart, Eye, ShareNetwork, Scales, Flame, ArrowsLeftRight } from '@phosp
 import { InsightsCard, InsightsSection, InsightsLoading, InsightsEmpty, MetricChip } from '../shared/InsightsCard';
 import { safeGet, fmtCompact, fmtPct, fmtMoney } from '../shared/insightsApi';
 import CustomerDrillSheet from '../shared/CustomerDrillSheet';
+import { useLang } from '../../../i18n';
 
 const TrafficVertical = ({ scope, period = 30 }) => {
+  const { t } = useLang();
   const [loading, setLoading] = useState(true);
   const [analytics, setAnalytics] = useState(null);
   const [marketing, setMarketing] = useState(null);
@@ -75,9 +77,9 @@ const TrafficVertical = ({ scope, period = 30 }) => {
 
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.15 }} className="space-y-6">
-      <InsightsSection id="traffic-funnel" title="Visits Funnel" subtitle="Site visits → vehicle views → engagement → lead submission">
+      <InsightsSection id="traffic-funnel" title={t('ins_sec_visits_funnel')} subtitle={t('ins_sec_visits_funnel_sub')} tip={t('ins_tip_visits_funnel')}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <InsightsCard className="lg:col-span-7" title="Funnel" testId="insights-traffic-funnel-card">
+          <InsightsCard className="lg:col-span-7" title={t('ins_sec_visits_funnel')} testId="insights-traffic-funnel-card">
             <div className="h-72" data-testid="insights-traffic-funnel-chart">
               <ResponsiveContainer width="100%" height="100%">
                 <FunnelChart>
@@ -90,7 +92,7 @@ const TrafficVertical = ({ scope, period = 30 }) => {
               </ResponsiveContainer>
             </div>
           </InsightsCard>
-          <InsightsCard className="lg:col-span-5" title="Traffic Sources & ROI" testId="insights-traffic-sources-table">
+          <InsightsCard className="lg:col-span-5" title={t('ins_sec_traffic_sources')} tip={t('ins_tip_traffic_sources')} testId="insights-traffic-sources-table">
             {sources.length === 0 ? <InsightsEmpty title="No traffic-source data for this period." /> : (
               <div className="max-h-72 overflow-auto">
                 <table className="w-full text-sm">
@@ -117,7 +119,7 @@ const TrafficVertical = ({ scope, period = 30 }) => {
         </div>
       </InsightsSection>
 
-      <InsightsSection id="campaign-roi" title="Campaign ROI & Optimizer" subtitle="Spend vs attributed revenue">
+      <InsightsSection id="campaign-roi" title={t('ins_sec_campaign_roi')} subtitle={t('ins_sec_campaign_roi_sub')} tip={t('ins_tip_campaign_roi')}>
         <InsightsCard testId="insights-campaign-roi-card" padded={false}>
           {campaigns.length === 0 ? <div className="p-5"><InsightsEmpty title="No active campaigns" /></div> : (
             <div className="max-h-80 overflow-auto">
@@ -177,9 +179,9 @@ const TrafficVertical = ({ scope, period = 30 }) => {
         </InsightsCard>
       </InsightsSection>
 
-      <InsightsSection id="top-entities" title="Top Users · Top Vehicles · Hot Leads" subtitle="What's hot right now">
+      <InsightsSection id="top-entities" title={t('ins_sec_top_entities')} subtitle={t('ins_sec_top_entities_sub')}>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Heart size={14} weight="duotone" /> Top Users</span>} testId="insights-top-users-table">
+          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Heart size={14} weight="duotone" /> {t('ins_card_top_users')}</span>} tip={t('ins_tip_top_users')} testId="insights-top-users-table">
             {topUsers.length === 0 ? <InsightsEmpty title="No customer activity yet" /> : (
               <ul className="divide-y divide-zinc-50">
                 {topUsers.slice(0, 10).map((u, i) => (
@@ -200,7 +202,7 @@ const TrafficVertical = ({ scope, period = 30 }) => {
               </ul>
             )}
           </InsightsCard>
-          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Eye size={14} weight="duotone" /> Top Vehicles</span>} testId="insights-top-vehicles-table">
+          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Eye size={14} weight="duotone" /> {t('ins_card_top_vehicles')}</span>} tip={t('ins_tip_top_vehicles')} testId="insights-top-vehicles-table">
             {topVehicles.length === 0 ? <InsightsEmpty title="No vehicle interest yet" /> : (
               <ul className="divide-y divide-zinc-50">
                 {topVehicles.slice(0, 10).map((v, i) => (
@@ -219,7 +221,7 @@ const TrafficVertical = ({ scope, period = 30 }) => {
               </ul>
             )}
           </InsightsCard>
-          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Flame size={14} weight="duotone" /> Hot Leads (AI score)</span>} testId="insights-hot-leads-table">
+          <InsightsCard title={<span className="flex items-center gap-2 text-sm font-medium"><Flame size={14} weight="duotone" /> {t('ins_card_hot_leads')}</span>} tip={t('ins_tip_hot_leads')} testId="insights-hot-leads-table">
             {hotLeads.length === 0 ? <InsightsEmpty title="No hot leads right now" /> : (
               <ul className="divide-y divide-zinc-50">
                 {hotLeads.slice(0, 10).map((l, i) => (
